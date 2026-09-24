@@ -5,159 +5,139 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>HoKStat.gg — Honor of Kings Database & Tools</title>
-  <meta
-    name="description"
-    content="Heroes, equipment, builds, calculator, meta, patches, guides and community resources for Honor of Kings."
-  >
+  <meta name="description" content="Heroes, equipment, builds, calculator, meta, patches, guides and community resources for Honor of Kings.">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-    rel="stylesheet"
-  >
-
-  <link rel="stylesheet" href="css/style.css">
+  <!-- IMPORTANT: relative paths for GitHub Pages -->
+  <link rel="stylesheet" href="./css/style.css">
 </head>
 
 <body>
 
   <div class="site-bg">
     <div class="bg-grid"></div>
-    <div class="bg-glow bg-glow-a"></div>
-    <div class="bg-glow bg-glow-b"></div>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
   </div>
 
-  <!-- =========================================================
-       HEADER
-  ========================================================== -->
+  <!-- HEADER -->
   <header class="topbar">
+    <div class="topbar-inner">
 
-    <a href="index.html" class="brand">
-      <span>HoKStat</span><b>.gg</b>
-    </a>
+      <a class="brand" href="./index.html">
+        <span>HoKStat</span><b>.gg</b>
+      </a>
 
-    <nav class="desktop-nav">
-      <a href="index.html?page=heroes">Heroes</a>
-      <a href="index.html?page=equipment">Equipment</a>
-      <a href="index.html?page=builds">Builds</a>
-      <a href="index.html?page=calculator">Calculator</a>
-      <a href="index.html?page=meta">Meta</a>
-      <a href="index.html?page=patches">Patches</a>
-      <a href="index.html?page=guides">Guides</a>
-      <a href="index.html?page=community">Community</a>
-    </nav>
+      <nav class="desktop-nav">
+        <a href="./index.html?page=heroes">Heroes</a>
+        <a href="./index.html?page=equipment">Equipment</a>
+        <a href="./index.html?page=builds">Builds</a>
+        <a href="./index.html?page=calculator">Calculator</a>
+        <a href="./index.html?page=meta">Meta</a>
+        <a href="./index.html?page=patches">Patches</a>
+        <a href="./index.html?page=guides">Guides</a>
+        <a href="./index.html?page=community">Community</a>
+      </nav>
 
-    <div class="header-actions">
-      <button class="icon-btn" id="globalSearchBtn" aria-label="Search">
-        ⌕
-      </button>
+      <div class="header-actions">
+        <button class="search-button" id="openSearch">
+          <span class="icon">⌕</span>
+          <span>Search</span>
+          <kbd>⌘ K</kbd>
+        </button>
 
-      <button class="menu-btn" id="mobileMenuBtn" aria-label="Menu">
-        ☰
-      </button>
-    </div>
-
-  </header>
-
-  <!-- MOBILE MENU -->
-  <aside class="mobile-menu" id="mobileMenu">
-    <div class="mobile-menu-head">
-      <strong>HoKStat<span>.gg</span></strong>
-      <button id="closeMobileMenu">×</button>
-    </div>
-
-    <a href="index.html">Home</a>
-    <a href="index.html?page=heroes">Heroes</a>
-    <a href="index.html?page=equipment">Equipment</a>
-    <a href="index.html?page=builds">Builds</a>
-    <a href="index.html?page=calculator">Calculator</a>
-    <a href="index.html?page=meta">Meta</a>
-    <a href="index.html?page=patches">Patches</a>
-    <a href="index.html?page=guides">Guides</a>
-    <a href="index.html?page=community">Community</a>
-    <a href="index.html?page=news">News</a>
-    <a href="index.html?page=about">About / Data</a>
-  </aside>
-
-  <div class="mobile-overlay" id="mobileOverlay"></div>
-
-  <!-- =========================================================
-       SEARCH OVERLAY
-  ========================================================== -->
-  <div class="search-overlay" id="searchOverlay">
-
-    <div class="search-box">
-
-      <button class="search-close" id="closeSearch">×</button>
-
-      <div class="eyebrow">GLOBAL SEARCH</div>
-
-      <h2>Search HoKStat</h2>
-
-      <p class="muted">
-        Heroes, equipment, builds, guides, patches and community.
-      </p>
-
-      <div class="search-input-wrap">
-        <span>⌕</span>
-        <input
-          id="globalSearchInput"
-          type="search"
-          placeholder="Try Dun, equipment, build..."
-          autocomplete="off"
-        >
+        <button class="menu-button" id="menuButton" aria-label="Open menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
       </div>
 
-      <div id="searchResults" class="search-results"></div>
-
     </div>
 
-  </div>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="./index.html">Home</a>
+      <a href="./index.html?page=heroes">Heroes</a>
+      <a href="./index.html?page=equipment">Equipment</a>
+      <a href="./index.html?page=builds">Builds</a>
+      <a href="./index.html?page=calculator">Calculator</a>
+      <a href="./index.html?page=meta">Meta</a>
+      <a href="./index.html?page=patches">Patches</a>
+      <a href="./index.html?page=guides">Guides</a>
+      <a href="./index.html?page=community">Community</a>
+      <a href="./index.html?page=news">News</a>
+      <a href="./index.html?page=about">About</a>
+    </div>
+  </header>
 
-  <!-- =========================================================
-       MAIN APP
-  ========================================================== -->
+
+  <!-- MAIN APP -->
   <main id="app"></main>
 
-  <!-- =========================================================
-       FOOTER
-  ========================================================== -->
-  <footer class="footer">
 
-    <div class="footer-main">
+  <!-- SEARCH MODAL -->
+  <div class="modal-backdrop" id="searchModal">
+    <div class="search-modal">
+
+      <div class="search-modal-head">
+        <div>
+          <small>GLOBAL SEARCH</small>
+          <h2>Find anything</h2>
+        </div>
+
+        <button class="close-button" id="closeSearch">×</button>
+      </div>
+
+      <div class="global-search-box">
+        <span>⌕</span>
+        <input id="globalSearchInput" type="text"
+               placeholder="Search heroes, equipment, builds, guides...">
+      </div>
+
+      <div id="searchResults" class="search-results">
+        <div class="search-empty">
+          Start typing to search HoKStat.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
 
       <div>
-        <div class="brand footer-brand">
-          <span>HoKStat</span><b>.gg</b>
+        <div class="footer-brand">
+          HoKStat<span>.gg</span>
         </div>
 
         <p>
-          Honor of Kings database, tools and community hub.
+          Independent Honor of Kings database & tools project.
         </p>
       </div>
 
       <div class="footer-links">
-        <a href="index.html?page=about">About</a>
-        <a href="index.html?page=about">Data</a>
-        <a href="index.html?page=patches">Patches</a>
-        <a href="index.html?page=community">Community</a>
+        <a href="./index.html?page=about">About</a>
+        <a href="./index.html?page=data">Data</a>
+        <a href="./index.html?page=news">News</a>
+        <a href="./index.html?page=community">Community</a>
+      </div>
+
+      <div class="footer-copy">
+        © 2026 HoKStat.gg · Created & maintained by NoName
       </div>
 
     </div>
-
-    <div class="footer-bottom">
-      <span>© 2026 HoKStat.gg · Created & maintained by NoName</span>
-      <span>Honor of Kings is a trademark of its respective owner.</span>
-    </div>
-
   </footer>
 
-  <!-- =========================================================
-       TOAST
-  ========================================================== -->
-  <div id="toast" class="toast"></div>
 
-  <script src="js/app.js"></script>
+  <!-- IMPORTANT: relative JS path -->
+  <script src="./js/app.js"></script>
+
 </body>
 </html>
