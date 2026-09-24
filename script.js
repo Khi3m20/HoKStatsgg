@@ -1,1201 +1,1560 @@
-/* =========================================================
-   HoKStat.gg — Frontend v1
-   Database-ready architecture
-========================================================= */
+/* ============================================================
+   HOKSTAT.GG
+   HOMEPAGE FRONTEND ENGINE
+   ============================================================ */
 
 
-/* =========================
-   MOCK DATA
-   Replace with API later.
-========================= */
+/* ============================================================
+   DEMO CONTENT
+   ------------------------------------------------------------
+   TEMPORARY ONLY.
 
-const HEROES = [
-  {
-    id: "dun",
-    name: "Dun",
-    role: "tank",
-    lane: "clash",
-    difficulty: "Medium",
-    description: "A durable Clash Lane hero built around sustained frontline pressure."
-  },
-  {
-    id: "arthur",
-    name: "Arthur",
-    role: "fighter",
-    lane: "clash",
-    difficulty: "Easy",
-    description: "A straightforward fighter with strong frontline utility."
-  },
-  {
-    id: "diaochan",
-    name: "Diao Chan",
-    role: "mage",
-    lane: "mid",
-    difficulty: "Hard",
-    description: "A mobile mage focused on ability timing and sustained magic damage."
-  }
+   Later this entire section will be replaced by API/database
+   data from HoKStat.
+
+   Artwork fields are intentionally empty.
+   Admin / official asset system can fill them later.
+   ============================================================ */
+
+const homepageContent = [
+
+    {
+        type: "hero",
+
+        title: "Discover the Heroes",
+
+        subtitle:
+            "Explore abilities, stats, builds, skins and more.",
+
+        meta: [
+            "Hero Database",
+            "Official Data"
+        ],
+
+        buttonText: "EXPLORE HEROES",
+
+        link: "/heroes",
+
+        artwork: "",
+
+        alt: "Honor of Kings hero artwork"
+    },
+
+
+    {
+        type: "build",
+
+        title: "Build Your Way",
+
+        subtitle:
+            "Explore recommended builds or create your own setup.",
+
+        meta: [
+            "6 Equipment Slots",
+            "Calculator Ready"
+        ],
+
+        buttonText: "VIEW BUILDS",
+
+        link: "/builds",
+
+        artwork: "",
+
+        alt: "Honor of Kings build artwork",
+
+        items: [
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+        ]
+    },
+
+
+    {
+        type: "equipment",
+
+        title: "Know Your Equipment",
+
+        subtitle:
+            "Stats, passives, prices, build paths and item history.",
+
+        meta: [
+            "Official Data",
+            "Item Database"
+        ],
+
+        buttonText: "EXPLORE EQUIPMENT",
+
+        link: "/equipment",
+
+        artwork: "",
+
+        alt: "Honor of Kings equipment artwork"
+    },
+
+
+    {
+        type: "patch",
+
+        title: "Patch Updates",
+
+        subtitle:
+            "Track hero changes, equipment changes and system updates.",
+
+        meta: [
+            "Patch History",
+            "Version Tracking"
+        ],
+
+        buttonText: "VIEW PATCHES",
+
+        link: "/patches",
+
+        artwork: "",
+
+        alt: "Honor of Kings patch artwork",
+
+        version: "PATCH —",
+
+        date: "DATE —"
+    },
+
+
+    {
+        type: "guide",
+
+        title: "Learn the Game",
+
+        subtitle:
+            "From beginner fundamentals to advanced gameplay.",
+
+        meta: [
+            "Guides",
+            "Community"
+        ],
+
+        buttonText: "READ GUIDES",
+
+        link: "/guides",
+
+        artwork: "",
+
+        alt: "Honor of Kings guide artwork"
+    },
+
+
+    {
+        type: "news",
+
+        title: "What's Happening in HoK?",
+
+        subtitle:
+            "Official announcements, upcoming content and community news.",
+
+        meta: [
+            "Official News",
+            "Updates"
+        ],
+
+        buttonText: "VIEW NEWS",
+
+        link: "/news",
+
+        artwork: "",
+
+        alt: "Honor of Kings news artwork"
+    }
+
 ];
 
 
-const EQUIPMENT = [
-  {
-    id: "item-01",
-    name: "Defensive Core",
-    type: "defense",
-    price: 2100,
-    description: "Example defensive equipment."
-  },
-  {
-    id: "item-02",
-    name: "Warrior Edge",
-    type: "attack",
-    price: 2300,
-    description: "Example physical attack equipment."
-  },
-  {
-    id: "item-03",
-    name: "Arcane Guard",
-    type: "magic",
-    price: 2000,
-    description: "Example magical defense equipment."
-  },
-  {
-    id: "item-04",
-    name: "Swift Boots",
-    type: "movement",
-    price: 900,
-    description: "Example movement equipment."
-  },
-  {
-    id: "item-05",
-    name: "Iron Barrier",
-    type: "defense",
-    price: 1950,
-    description: "Example armor equipment."
-  },
-  {
-    id: "item-06",
-    name: "Vital Core",
-    type: "defense",
-    price: 2200,
-    description: "Example HP equipment."
-  }
-];
-
-
-/* =========================================================
-   HOMEPAGE SLIDER
-========================================================= */
-
-const SLIDES = [
-  {
-    type: "FEATURED HERO",
-    title: "Dun",
-    subtitle: "Tank · Clash Lane",
-    description: "Explore hero stats, skills, builds and everything you need to understand Dun.",
-    button: "Explore Hero",
-    page: "heroes",
-    secondary: "View Database",
-    background: "hero"
-  },
-  {
-    type: "FEATURED BUILD",
-    title: "Standard Tank",
-    subtitle: "Dun · 6 Equipment",
-    description: "A balanced defensive setup ready to test in the equipment calculator.",
-    button: "Try Build",
-    page: "calculator",
-    secondary: "View Builds",
-    background: "build"
-  },
-  {
-    type: "PATCH UPDATE",
-    title: "Patch Center",
-    subtitle: "Official · Structured",
-    description: "Track official updates, hero changes, equipment changes and historical versions.",
-    button: "View Patches",
-    page: "patches",
-    secondary: "Change History",
-    background: "patch"
-  },
-  {
-    type: "EQUIPMENT",
-    title: "Equipment",
-    subtitle: "Stats · Passives · Build Paths",
-    description: "Browse equipment and understand exactly how each item contributes to a build.",
-    button: "Explore Equipment",
-    page: "equipment",
-    secondary: "Open Calculator",
-    background: "equipment"
-  },
-  {
-    type: "GUIDE",
-    title: "Guides",
-    subtitle: "Beginner → Advanced",
-    description: "Practical knowledge, hero fundamentals, gameplay concepts and advanced strategies.",
-    button: "Read Guides",
-    page: "guides",
-    secondary: "Explore Heroes",
-    background: "guide"
-  },
-  {
-    type: "COMMUNITY",
-    title: "Community",
-    subtitle: "Questions · Answers · Discussion",
-    description: "Ask questions, share knowledge and discover community resources.",
-    button: "Join Community",
-    page: "community",
-    secondary: "Global Search",
-    background: "community"
-  }
-];
-
+/* ============================================================
+   STATE
+   ============================================================ */
 
 let currentSlide = 0;
-let slideTimer = null;
+
+let sliderTimer = null;
+
+const SLIDE_DURATION = 6500;
 
 
-const heroBackground = document.getElementById("heroBackground");
-const slideType = document.getElementById("slideType");
-const slideTitle = document.getElementById("slideTitle");
-const slideSubtitle = document.getElementById("slideSubtitle");
-const slideDescription = document.getElementById("slideDescription");
-const slideCounter = document.getElementById("slideCounter");
-const slidePrimaryButton = document.getElementById("slidePrimaryButton");
-const slideSecondaryButton = document.getElementById("slideSecondaryButton");
-const sliderDots = document.getElementById("sliderDots");
+/* ============================================================
+   DOM
+   ============================================================ */
+
+const slidesContainer =
+    document.getElementById("slidesContainer");
+
+const sliderDots =
+    document.getElementById("sliderDots");
+
+const slideCounter =
+    document.getElementById("slideCounter");
+
+const sliderPrev =
+    document.getElementById("sliderPrev");
+
+const sliderNext =
+    document.getElementById("sliderNext");
+
+const heroSlider =
+    document.getElementById("heroSlider");
+
+const menuToggle =
+    document.getElementById("menuToggle");
+
+const mainMenu =
+    document.getElementById("mainMenu");
 
 
-function createSliderDots() {
+/* ============================================================
+   HELPERS
+   ============================================================ */
 
-  sliderDots.innerHTML = "";
+function escapeHTML(value) {
 
-  SLIDES.forEach((_, index) => {
+    if (value === null || value === undefined) {
+        return "";
+    }
 
-    const button = document.createElement("button");
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
 
-    button.type = "button";
-    button.className = "slider-dot";
-    button.setAttribute("aria-label", `Go to slide ${index + 1}`);
 
-    button.addEventListener("click", () => {
-      currentSlide = index;
-      renderSlide();
-      restartSlider();
+function typeLabel(type) {
+
+    const labels = {
+
+        hero: "FEATURED HERO",
+
+        build: "FEATURED BUILD",
+
+        equipment: "EQUIPMENT",
+
+        patch: "LATEST UPDATE",
+
+        guide: "FEATURED GUIDE",
+
+        news: "NEWS"
+
+    };
+
+    return labels[type] || "FEATURED";
+}
+
+
+function loadImage(imageElement, url, alt = "") {
+
+    if (!imageElement || !url) {
+        return;
+    }
+
+    imageElement.alt = alt;
+
+    imageElement.onload = () => {
+
+        imageElement.classList.add("loaded");
+
+    };
+
+    imageElement.onerror = () => {
+
+        imageElement.classList.remove("loaded");
+
+    };
+
+    imageElement.src = url;
+}
+
+
+/* ============================================================
+   BUILD SLIDES
+   ============================================================ */
+
+function createSlides() {
+
+    slidesContainer.innerHTML = "";
+
+    sliderDots.innerHTML = "";
+
+    homepageContent.forEach((item, index) => {
+
+        const slide =
+            document.createElement("article");
+
+        slide.className =
+            "hero-slide" +
+            (index === 0 ? " active" : "");
+
+        slide.dataset.type = item.type;
+
+        slide.dataset.index = index;
+
+
+        /* ART */
+
+        const art =
+            document.createElement("div");
+
+        art.className =
+            `slide-art ${item.type}-art`;
+
+
+        const image =
+            document.createElement("img");
+
+        image.className =
+            "slide-image";
+
+        image.alt =
+            item.alt || "";
+
+
+        if (item.artwork) {
+
+            loadImage(
+                image,
+                item.artwork,
+                item.alt
+            );
+
+        }
+
+
+        art.appendChild(image);
+
+
+        /* CONTENT */
+
+        const content =
+            document.createElement("div");
+
+        content.className =
+            "slide-content";
+
+
+        const category =
+            document.createElement("span");
+
+        category.className =
+            "slide-category";
+
+        category.textContent =
+            typeLabel(item.type);
+
+
+        const title =
+            document.createElement("h1");
+
+        title.className =
+            "slide-title";
+
+        title.textContent =
+            item.title;
+
+
+        const subtitle =
+            document.createElement("p");
+
+        subtitle.className =
+            "slide-subtitle";
+
+        subtitle.textContent =
+            item.subtitle;
+
+
+        content.appendChild(category);
+
+        content.appendChild(title);
+
+        content.appendChild(subtitle);
+
+
+        /* META */
+
+        if (Array.isArray(item.meta)) {
+
+            const meta =
+                document.createElement("div");
+
+            meta.className =
+                "slide-meta";
+
+
+            item.meta.forEach(metaText => {
+
+                const span =
+                    document.createElement("span");
+
+                span.textContent =
+                    metaText;
+
+                meta.appendChild(span);
+
+            });
+
+
+            content.appendChild(meta);
+
+        }
+
+
+        /* BUILD ITEMS */
+
+        if (
+            item.type === "build" &&
+            Array.isArray(item.items)
+        ) {
+
+            const preview =
+                document.createElement("div");
+
+            preview.className =
+                "equipment-preview";
+
+
+            item.items.forEach((itemImage, itemIndex) => {
+
+                const slot =
+                    document.createElement("div");
+
+                slot.className =
+                    "equipment-slot";
+
+
+                const slotImage =
+                    document.createElement("img");
+
+                slotImage.alt =
+                    `Equipment slot ${itemIndex + 1}`;
+
+
+                if (itemImage) {
+
+                    loadImage(
+                        slotImage,
+                        itemImage,
+                        `Equipment slot ${itemIndex + 1}`
+                    );
+
+                }
+
+
+                slot.appendChild(slotImage);
+
+                preview.appendChild(slot);
+
+            });
+
+
+            content.appendChild(preview);
+
+        }
+
+
+        /* PATCH META */
+
+        if (item.type === "patch") {
+
+            const patchMeta =
+                document.createElement("div");
+
+            patchMeta.className =
+                "slide-meta";
+
+
+            const version =
+                document.createElement("span");
+
+            version.textContent =
+                item.version || "PATCH —";
+
+
+            const date =
+                document.createElement("span");
+
+            date.textContent =
+                item.date || "DATE —";
+
+
+            patchMeta.appendChild(version);
+
+            patchMeta.appendChild(date);
+
+            content.appendChild(patchMeta);
+
+        }
+
+
+        /* BUTTON */
+
+        const button =
+            document.createElement("a");
+
+        button.className =
+            "slide-button primary-button";
+
+        button.href =
+            item.link || "#";
+
+        button.textContent =
+            item.buttonText || "EXPLORE";
+
+
+        content.appendChild(button);
+
+
+        slide.appendChild(art);
+
+        slide.appendChild(content);
+
+        slidesContainer.appendChild(slide);
+
+
+        /* DOT */
+
+        const dot =
+            document.createElement("button");
+
+        dot.type = "button";
+
+        dot.className =
+            "slider-dot" +
+            (index === 0 ? " active" : "");
+
+        dot.dataset.slide = index;
+
+        dot.setAttribute(
+            "aria-label",
+            `Go to slide ${index + 1}`
+        );
+
+
+        dot.addEventListener(
+            "click",
+            () => {
+
+                goToSlide(index);
+
+                restartSlider();
+
+            }
+        );
+
+
+        sliderDots.appendChild(dot);
+
     });
 
-    sliderDots.appendChild(button);
 
-  });
+    updateCounter();
+
 }
 
 
-function getBackground(slide) {
+/* ============================================================
+   SLIDER
+   ============================================================ */
 
-  const backgrounds = {
-    hero:
-      "radial-gradient(circle at 72% 35%, rgba(32,200,120,.2), transparent 30%), linear-gradient(100deg,#06090f 5%,rgba(6,9,15,.82) 40%,rgba(8,20,29,.12) 85%), linear-gradient(145deg,#19364b,#05090f 70%)",
+function getSlides() {
 
-    build:
-      "radial-gradient(circle at 75% 40%,rgba(32,200,120,.18),transparent 25%), linear-gradient(100deg,#06090f 5%,rgba(6,9,15,.86) 42%,rgba(8,20,29,.15) 85%), linear-gradient(145deg,#1a293e,#05090f 70%)",
+    return Array.from(
+        slidesContainer.querySelectorAll(
+            ".hero-slide"
+        )
+    );
 
-    patch:
-      "radial-gradient(circle at 70% 35%,rgba(120,150,190,.12),transparent 25%), linear-gradient(100deg,#06090f 5%,rgba(6,9,15,.9) 45%,rgba(8,20,29,.2) 85%), linear-gradient(145deg,#182638,#05090f 70%)",
-
-    equipment:
-      "radial-gradient(circle at 75% 30%,rgba(32,200,120,.13),transparent 25%), linear-gradient(100deg,#06090f 5%,rgba(6,9,15,.9) 45%,rgba(8,20,29,.2) 85%), linear-gradient(145deg,#263344,#05090f 70%)",
-
-    guide:
-      "radial-gradient(circle at 70% 40%,rgba(32,200,120,.12),transparent 25%), linear-gradient(100deg,#06090f 5%,rgba(6,9,15,.9) 45%,rgba(8,20,29,.2) 85%), linear-gradient(145deg,#203548,#05090f 70%)",
-
-    community:
-      "radial-gradient(circle at 75% 30%,rgba(32,200,120,.15),transparent 25%), linear-gradient(100deg,#06090f 5%,rgba(6,9,15,.9) 45%,rgba(8,20,29,.2) 85%), linear-gradient(145deg,#172b3d,#05090f 70%)"
-  };
-
-  return backgrounds[slide.background] || backgrounds.hero;
 }
 
 
-function renderSlide() {
+function getDots() {
 
-  const slide = SLIDES[currentSlide];
+    return Array.from(
+        sliderDots.querySelectorAll(
+            ".slider-dot"
+        )
+    );
 
-  slideType.textContent = slide.type;
-  slideTitle.textContent = slide.title;
-  slideSubtitle.textContent = slide.subtitle;
-  slideDescription.textContent = slide.description;
+}
 
-  slideCounter.textContent =
-    `${String(currentSlide + 1).padStart(2, "0")} / ${String(SLIDES.length).padStart(2, "0")}`;
 
-  heroBackground.style.background = getBackground(slide);
+function goToSlide(index) {
 
-  slidePrimaryButton.textContent = slide.button;
-  slideSecondaryButton.textContent = slide.secondary;
+    const slides = getSlides();
 
-  slidePrimaryButton.dataset.page = slide.page;
+    const dots = getDots();
 
-  if (slide.page) {
-    slideSecondaryButton.dataset.page =
-      slide.page === "calculator" ? "builds" :
-      slide.page === "heroes" ? "equipment" :
-      slide.page;
-  }
 
-  [...sliderDots.children].forEach((dot, index) => {
-    dot.classList.toggle("active", index === currentSlide);
-  });
+    if (!slides.length) {
+        return;
+    }
+
+
+    if (index < 0) {
+        index = slides.length - 1;
+    }
+
+    if (index >= slides.length) {
+        index = 0;
+    }
+
+
+    slides.forEach(
+        (slide, slideIndex) => {
+
+            slide.classList.toggle(
+                "active",
+                slideIndex === index
+            );
+
+        }
+    );
+
+
+    dots.forEach(
+        (dot, dotIndex) => {
+
+            dot.classList.toggle(
+                "active",
+                dotIndex === index
+            );
+
+        }
+    );
+
+
+    currentSlide = index;
+
+    updateCounter();
+
 }
 
 
 function nextSlide() {
 
-  currentSlide = (currentSlide + 1) % SLIDES.length;
+    goToSlide(
+        currentSlide + 1
+    );
 
-  renderSlide();
 }
 
 
 function previousSlide() {
 
-  currentSlide =
-    (currentSlide - 1 + SLIDES.length) % SLIDES.length;
+    goToSlide(
+        currentSlide - 1
+    );
 
-  renderSlide();
+}
+
+
+function startSlider() {
+
+    stopSlider();
+
+
+    sliderTimer =
+        setInterval(
+            () => {
+
+                nextSlide();
+
+            },
+            SLIDE_DURATION
+        );
+
+}
+
+
+function stopSlider() {
+
+    if (sliderTimer) {
+
+        clearInterval(sliderTimer);
+
+        sliderTimer = null;
+
+    }
+
 }
 
 
 function restartSlider() {
 
-  clearInterval(slideTimer);
-
-  slideTimer = setInterval(() => {
-
-    nextSlide();
-
-  }, 6500);
+    startSlider();
 
 }
 
 
-document.getElementById("slideNext").addEventListener("click", () => {
+function updateCounter() {
 
-  nextSlide();
-  restartSlider();
+    const total =
+        homepageContent.length;
 
-});
-
-
-document.getElementById("slidePrev").addEventListener("click", () => {
-
-  previousSlide();
-  restartSlider();
-
-});
+    const current =
+        currentSlide + 1;
 
 
-createSliderDots();
-renderSlide();
-restartSlider();
-
-
-/* Pause while pointer is over cinematic hero */
-
-const cinematicHero = document.querySelector(".cinematic-hero");
-
-cinematicHero.addEventListener("mouseenter", () => {
-  clearInterval(slideTimer);
-});
-
-cinematicHero.addEventListener("mouseleave", restartSlider);
-
-
-/* =========================================================
-   PAGE ROUTING
-========================================================= */
-
-const pages = document.querySelectorAll(".page");
-
-
-function showPage(pageName) {
-
-  const target = document.getElementById(`page-${pageName}`);
-
-  if (!target) {
-    return;
-  }
-
-  pages.forEach(page => {
-    page.classList.remove("active");
-  });
-
-  target.classList.add("active");
-
-  document.querySelectorAll("[data-page]").forEach(link => {
-
-    link.classList.toggle(
-      "active",
-      link.dataset.page === pageName
-    );
-
-  });
-
-  closeMenu();
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
+    slideCounter.textContent =
+        `${String(current).padStart(2, "0")} / ${String(total).padStart(2, "0")}`;
 
 }
 
 
-function handleRoute() {
+/* ============================================================
+   SLIDER EVENTS
+   ============================================================ */
 
-  const route =
-    window.location.hash.replace("#", "") || "home";
+sliderNext.addEventListener(
+    "click",
+    () => {
 
-  showPage(route);
+        nextSlide();
 
-}
+        restartSlider();
 
-
-window.addEventListener("hashchange", handleRoute);
-
-
-document.addEventListener("click", event => {
-
-  const button = event.target.closest("[data-page]");
-
-  if (!button) {
-    return;
-  }
-
-  const page = button.dataset.page;
-
-  if (!page) {
-    return;
-  }
-
-  window.location.hash = page;
-
-});
-
-
-handleRoute();
-
-
-/* =========================================================
-   MOBILE MENU
-========================================================= */
-
-const sideMenu = document.getElementById("sideMenu");
-const menuOverlay = document.getElementById("menuOverlay");
-
-
-function openMenu() {
-
-  sideMenu.classList.add("open");
-  menuOverlay.classList.add("open");
-
-  sideMenu.setAttribute("aria-hidden", "false");
-
-}
-
-
-function closeMenu() {
-
-  sideMenu.classList.remove("open");
-  menuOverlay.classList.remove("open");
-
-  sideMenu.setAttribute("aria-hidden", "true");
-
-}
-
-
-document.getElementById("menuToggle")
-  .addEventListener("click", openMenu);
-
-
-document.getElementById("menuClose")
-  .addEventListener("click", closeMenu);
-
-
-menuOverlay.addEventListener("click", closeMenu);
-
-
-/* =========================================================
-   GLOBAL SEARCH
-========================================================= */
-
-const searchOverlay = document.getElementById("searchOverlay");
-const globalSearchInput = document.getElementById("globalSearchInput");
-const searchResults = document.getElementById("searchResults");
-
-
-let searchType = "all";
-
-
-function openSearch(value = "") {
-
-  searchOverlay.classList.add("open");
-  searchOverlay.setAttribute("aria-hidden", "false");
-
-  globalSearchInput.value = value;
-
-  setTimeout(() => {
-    globalSearchInput.focus();
-    performSearch();
-  }, 50);
-
-}
-
-
-function closeSearch() {
-
-  searchOverlay.classList.remove("open");
-  searchOverlay.setAttribute("aria-hidden", "true");
-
-}
-
-
-document.getElementById("globalSearchButton")
-  .addEventListener("click", () => openSearch());
-
-
-document.getElementById("searchClose")
-  .addEventListener("click", closeSearch);
-
-
-searchOverlay.addEventListener("click", event => {
-
-  if (event.target === searchOverlay) {
-    closeSearch();
-  }
-
-});
-
-
-document.addEventListener("keydown", event => {
-
-  if (event.key === "Escape") {
-    closeSearch();
-    closeMenu();
-  }
-
-});
-
-
-document.querySelectorAll("[data-search-type]").forEach(button => {
-
-  button.addEventListener("click", () => {
-
-    searchType = button.dataset.searchType;
-
-    document.querySelectorAll("[data-search-type]").forEach(item => {
-      item.classList.remove("active");
-    });
-
-    button.classList.add("active");
-
-    performSearch();
-
-  });
-
-});
-
-
-function getSearchData() {
-
-  return [
-
-    ...HEROES.map(hero => ({
-      type: "heroes",
-      title: hero.name,
-      description: `${hero.role} · ${hero.lane}`,
-      page: "heroes"
-    })),
-
-    ...EQUIPMENT.map(item => ({
-      type: "equipment",
-      title: item.name,
-      description: `${item.type} · ${item.price} gold`,
-      page: "equipment"
-    })),
-
-    {
-      type: "builds",
-      title: "Dun Standard Tank",
-      description: "Recommended Build",
-      page: "builds"
-    },
-
-    {
-      type: "guides",
-      title: "Dun Fundamentals",
-      description: "Hero Guide",
-      page: "guides"
-    },
-
-    {
-      type: "news",
-      title: "Latest Official Announcement",
-      description: "Official News",
-      page: "news"
     }
-
-  ];
-
-}
-
-
-function performSearch() {
-
-  const query =
-    globalSearchInput.value.trim().toLowerCase();
-
-  if (!query) {
-
-    searchResults.innerHTML = `
-      <div class="search-empty">
-        Start typing to search HoKStat.
-      </div>
-    `;
-
-    return;
-  }
-
-
-  const data = getSearchData();
-
-  const results = data.filter(item => {
-
-    const matchesText =
-      item.title.toLowerCase().includes(query) ||
-      item.description.toLowerCase().includes(query);
-
-    const matchesType =
-      searchType === "all" ||
-      item.type === searchType;
-
-    return matchesText && matchesType;
-
-  });
-
-
-  if (!results.length) {
-
-    searchResults.innerHTML = `
-      <div class="search-empty">
-        <strong>No results found.</strong>
-        <br>
-        Try another name or category.
-      </div>
-    `;
-
-    return;
-  }
-
-
-  searchResults.innerHTML = results
-    .slice(0, 12)
-    .map(item => `
-
-      <button
-        class="search-result"
-        type="button"
-        data-page="${item.page}"
-      >
-
-        <span>
-          <strong>${escapeHtml(item.title)}</strong>
-          <small>${escapeHtml(item.description)}</small>
-        </span>
-
-        <span>→</span>
-
-      </button>
-
-    `)
-    .join("");
-
-}
-
-
-globalSearchInput.addEventListener(
-  "input",
-  performSearch
 );
 
 
-/* =========================================================
-   HOME SEARCH
-========================================================= */
+sliderPrev.addEventListener(
+    "click",
+    () => {
 
-const homeSearchInput =
-  document.getElementById("homeSearchInput");
+        previousSlide();
+
+        restartSlider();
+
+    }
+);
 
 
-function runHomeSearch(value) {
+heroSlider.addEventListener(
+    "mouseenter",
+    () => {
 
-  if (!value.trim()) {
-    openSearch();
-    return;
-  }
+        stopSlider();
 
-  openSearch(value);
+    }
+);
+
+
+heroSlider.addEventListener(
+    "mouseleave",
+    () => {
+
+        startSlider();
+
+    }
+);
+
+
+/* ============================================================
+   TOUCH / SWIPE
+   ============================================================ */
+
+let touchStartX = 0;
+
+let touchEndX = 0;
+
+
+heroSlider.addEventListener(
+    "touchstart",
+    event => {
+
+        touchStartX =
+            event.changedTouches[0].screenX;
+
+        stopSlider();
+
+    },
+    { passive: true }
+);
+
+
+heroSlider.addEventListener(
+    "touchend",
+    event => {
+
+        touchEndX =
+            event.changedTouches[0].screenX;
+
+
+        const distance =
+            touchEndX - touchStartX;
+
+
+        if (Math.abs(distance) > 50) {
+
+            if (distance < 0) {
+                nextSlide();
+            } else {
+                previousSlide();
+            }
+
+        }
+
+
+        startSlider();
+
+    },
+    { passive: true }
+);
+
+
+/* ============================================================
+   KEYBOARD
+   ============================================================ */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key === "ArrowRight"
+        ) {
+
+            nextSlide();
+
+            restartSlider();
+
+        }
+
+
+        if (
+            event.key === "ArrowLeft"
+        ) {
+
+            previousSlide();
+
+            restartSlider();
+
+        }
+
+    }
+);
+
+
+/* ============================================================
+   MOBILE MENU
+   ============================================================ */
+
+menuToggle.addEventListener(
+    "click",
+    () => {
+
+        const isOpen =
+            mainMenu.classList.toggle(
+                "open"
+            );
+
+
+        menuToggle.setAttribute(
+            "aria-expanded",
+            String(isOpen)
+        );
+
+    }
+);
+
+
+/* Close menu after navigation */
+
+mainMenu.addEventListener(
+    "click",
+    event => {
+
+        if (
+            event.target.tagName === "A"
+        ) {
+
+            mainMenu.classList.remove(
+                "open"
+            );
+
+            menuToggle.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+        }
+
+    }
+);
+
+
+/* ============================================================
+   QUICK SEARCH
+   ------------------------------------------------------------
+   TEMPORARY local search.
+   Later replaced with /api/search.
+   ============================================================ */
+
+const searchableContent = [
+
+    {
+        type: "HERO",
+        name: "Dun",
+        url: "/heroes/dun"
+    },
+
+    {
+        type: "HERO",
+        name: "Arthur",
+        url: "/heroes/arthur"
+    },
+
+    {
+        type: "EQUIPMENT",
+        name: "Equipment Database",
+        url: "/equipment"
+    },
+
+    {
+        type: "BUILD",
+        name: "Recommended Builds",
+        url: "/builds"
+    },
+
+    {
+        type: "GUIDE",
+        name: "Beginner Guides",
+        url: "/guides"
+    },
+
+    {
+        type: "PATCH",
+        name: "Patch History",
+        url: "/patches"
+    },
+
+    {
+        type: "NEWS",
+        name: "Honor of Kings News",
+        url: "/news"
+    },
+
+    {
+        type: "COMMUNITY",
+        name: "Community Q&A",
+        url: "/community"
+    }
+
+];
+
+
+const quickSearchForm =
+    document.getElementById(
+        "quickSearchForm"
+    );
+
+const quickSearchInput =
+    document.getElementById(
+        "quickSearchInput"
+    );
+
+const quickSearchResults =
+    document.getElementById(
+        "quickSearchResults"
+    );
+
+
+function renderSearchResults(query) {
+
+    const cleanQuery =
+        query
+            .trim()
+            .toLowerCase();
+
+
+    if (!cleanQuery) {
+
+        quickSearchResults.hidden =
+            true;
+
+        quickSearchResults.innerHTML =
+            "";
+
+        return;
+
+    }
+
+
+    const results =
+        searchableContent
+            .filter(item =>
+                item.name
+                    .toLowerCase()
+                    .includes(cleanQuery)
+            )
+            .slice(0, 6);
+
+
+    if (!results.length) {
+
+        quickSearchResults.innerHTML = `
+
+            <div class="search-result">
+
+                <span class="search-result-type">
+                    SEARCH
+                </span>
+
+                <span class="search-result-name">
+                    No results found
+                </span>
+
+            </div>
+
+        `;
+
+        quickSearchResults.hidden =
+            false;
+
+        return;
+
+    }
+
+
+    quickSearchResults.innerHTML =
+        results
+            .map(item => `
+
+                <a
+                    href="${escapeHTML(item.url)}"
+                    class="search-result"
+                >
+
+                    <span class="search-result-type">
+                        ${escapeHTML(item.type)}
+                    </span>
+
+                    <span class="search-result-name">
+                        ${escapeHTML(item.name)}
+                    </span>
+
+                </a>
+
+            `)
+            .join("");
+
+
+    quickSearchResults.hidden =
+        false;
 
 }
 
 
-document.getElementById("homeSearchButton")
-  .addEventListener("click", () => {
+quickSearchInput.addEventListener(
+    "input",
+    () => {
 
-    runHomeSearch(homeSearchInput.value);
+        renderSearchResults(
+            quickSearchInput.value
+        );
 
-  });
+    }
+);
 
 
-homeSearchInput.addEventListener("keydown", event => {
+quickSearchForm.addEventListener(
+    "submit",
+    event => {
 
-  if (event.key === "Enter") {
-    runHomeSearch(homeSearchInput.value);
-  }
+        event.preventDefault();
 
-});
 
+        const query =
+            quickSearchInput.value
+                .trim();
 
-document.querySelectorAll("[data-search-suggestion]")
-  .forEach(button => {
 
-    button.addEventListener("click", () => {
+        if (!query) {
+            return;
+        }
 
-      runHomeSearch(button.dataset.searchSuggestion);
 
-    });
+        const firstResult =
+            searchableContent.find(item =>
+                item.name
+                    .toLowerCase()
+                    .includes(
+                        query.toLowerCase()
+                    )
+            );
 
-  });
 
+        if (firstResult) {
 
-/* =========================================================
-   HERO DATABASE
-========================================================= */
+            window.location.href =
+                firstResult.url;
 
-const heroGrid =
-  document.getElementById("heroGrid");
+        } else {
 
+            window.location.href =
+                `/search?q=${encodeURIComponent(query)}`;
 
-function renderHeroes() {
+        }
 
-  const search =
-    document.getElementById("heroSearch").value
-      .trim()
-      .toLowerCase();
+    }
+);
 
-  const role =
-    document.getElementById("heroRoleFilter").value;
 
-  const lane =
-    document.getElementById("heroLaneFilter").value;
+/* ============================================================
+   OFFICIAL PATCH NOTES
+   ------------------------------------------------------------
+   TEMPORARY PLACEHOLDER.
+   Later populated from verified official source.
+   ============================================================ */
 
+const officialPatch = {
 
-  const filtered = HEROES.filter(hero => {
+    version: "PATCH —",
 
-    const matchesSearch =
-      !search ||
-      hero.name.toLowerCase().includes(search);
+    title: "Latest Official Update",
 
-    const matchesRole =
-      role === "all" ||
-      hero.role === role;
+    summary:
+        "Official patch information will appear here after the verified official data source is connected.",
 
-    const matchesLane =
-      lane === "all" ||
-      hero.lane === lane;
+    date: "—",
 
-    return matchesSearch && matchesRole && matchesLane;
+    sourceUrl: "",
 
-  });
+    artwork: "",
 
+    alt:
+        "Official Honor of Kings patch artwork"
 
-  heroGrid.innerHTML = filtered.map(hero => `
-
-    <article class="hero-card">
-
-      <span class="panel-tag">
-        ${escapeHtml(hero.role)}
-      </span>
-
-      <h3>${escapeHtml(hero.name)}</h3>
-
-      <p>${escapeHtml(hero.description)}</p>
-
-      <div class="hero-card-footer">
-        <span>${escapeHtml(hero.lane)}</span>
-        <span>${escapeHtml(hero.difficulty)}</span>
-      </div>
-
-    </article>
-
-  `).join("");
-
-
-  if (!filtered.length) {
-
-    heroGrid.innerHTML = `
-      <div class="empty-panel">
-        No heroes found.
-      </div>
-    `;
-
-  }
-
-}
-
-
-document.getElementById("heroSearch")
-  .addEventListener("input", renderHeroes);
-
-
-document.getElementById("heroRoleFilter")
-  .addEventListener("change", renderHeroes);
-
-
-document.getElementById("heroLaneFilter")
-  .addEventListener("change", renderHeroes);
-
-
-renderHeroes();
-
-
-/* =========================================================
-   EQUIPMENT DATABASE
-========================================================= */
-
-const equipmentGrid =
-  document.getElementById("equipmentGrid");
-
-
-function renderEquipment() {
-
-  const search =
-    document.getElementById("equipmentSearch").value
-      .trim()
-      .toLowerCase();
-
-  const type =
-    document.getElementById("equipmentTypeFilter").value;
-
-
-  const filtered = EQUIPMENT.filter(item => {
-
-    const matchesSearch =
-      !search ||
-      item.name.toLowerCase().includes(search);
-
-    const matchesType =
-      type === "all" ||
-      item.type === type;
-
-    return matchesSearch && matchesType;
-
-  });
-
-
-  equipmentGrid.innerHTML = filtered.map(item => `
-
-    <article class="equipment-card">
-
-      <div class="item-icon">
-        ${item.id.slice(-2)}
-      </div>
-
-      <span class="panel-tag">${escapeHtml(item.type)}</span>
-
-      <h3>${escapeHtml(item.name)}</h3>
-
-      <p>${escapeHtml(item.description)}</p>
-
-      <span class="item-price">
-        ${Number(item.price).toLocaleString()} Gold
-      </span>
-
-    </article>
-
-  `).join("");
-
-}
-
-
-document.getElementById("equipmentSearch")
-  .addEventListener("input", renderEquipment);
-
-
-document.getElementById("equipmentTypeFilter")
-  .addEventListener("change", renderEquipment);
-
-
-renderEquipment();
-
-
-/* =========================================================
-   CALCULATOR
-========================================================= */
-
-const calculatorSlots =
-  document.getElementById("calculatorSlots");
-
-
-const calculatorState = {
-  hero: "dun",
-  level: 15,
-  items: [null, null, null, null, null, null]
 };
 
 
-function renderCalculatorSlots() {
+function renderOfficialPatch() {
 
-  calculatorSlots.innerHTML =
-    calculatorState.items.map((item, index) => {
+    const version =
+        document.getElementById(
+            "officialPatchVersion"
+        );
 
-      if (!item) {
+    const title =
+        document.getElementById(
+            "officialPatchTitle"
+        );
 
-        return `
-          <button
-            class="calc-slot"
-            type="button"
-            data-slot="${index}"
-          >
-            + Add Equipment
-          </button>
-        `;
+    const summary =
+        document.getElementById(
+            "officialPatchSummary"
+        );
 
-      }
+    const date =
+        document.getElementById(
+            "officialPatchDate"
+        );
 
-      return `
-        <button
-          class="calc-slot"
-          type="button"
-          data-slot="${index}"
-        >
-          ${escapeHtml(item.name)}
-        </button>
-      `;
+    const link =
+        document.getElementById(
+            "officialPatchLink"
+        );
 
-    }).join("");
+    const image =
+        document.getElementById(
+            "officialPatchImage"
+        );
 
 
-  calculatorSlots
-    .querySelectorAll("[data-slot]")
-    .forEach(slot => {
+    version.textContent =
+        officialPatch.version;
 
-      slot.addEventListener("click", () => {
+    title.textContent =
+        officialPatch.title;
 
-        const index =
-          Number(slot.dataset.slot);
+    summary.textContent =
+        officialPatch.summary;
 
-        openEquipmentPicker(index);
+    date.textContent =
+        officialPatch.date;
 
-      });
 
-    });
+    if (officialPatch.sourceUrl) {
+
+        link.href =
+            officialPatch.sourceUrl;
+
+        link.style.display =
+            "inline";
+
+    } else {
+
+        link.style.display =
+            "none";
+
+    }
+
+
+    if (officialPatch.artwork) {
+
+        loadImage(
+            image,
+            officialPatch.artwork,
+            officialPatch.alt
+        );
+
+    }
 
 }
 
 
-function openEquipmentPicker(index) {
+/* ============================================================
+   FEATURED CONTENT
+   ------------------------------------------------------------
+   TEMPORARY placeholder data.
+   ============================================================ */
 
-  const current =
-    calculatorState.items[index];
+const featuredContent = {
 
-  const choice =
-    window.prompt(
-      `Enter equipment name:\n\n${EQUIPMENT.map(item => item.name).join("\n")}\n\nLeave blank to remove.`,
-      current ? current.name : ""
-    );
+    main: {
 
+        tag: "FEATURED",
 
-  if (choice === null) {
-    return;
-  }
+        title: "Explore the World of HoKStat",
 
+        description:
+            "Heroes, equipment, builds, guides, updates and community resources.",
 
-  const normalized =
-    choice.trim().toLowerCase();
+        link: "/heroes",
 
+        artwork: "",
 
-  if (!normalized) {
+        alt: "Featured Honor of Kings content"
 
-    calculatorState.items[index] = null;
-
-    renderCalculatorSlots();
-    calculateStats();
-
-    return;
-  }
+    },
 
 
-  const found =
-    EQUIPMENT.find(item =>
-      item.name.toLowerCase() === normalized
-    );
+    smallOne: {
+
+        title: "Featured Hero",
+
+        link: "/heroes",
+
+        artwork: "",
+
+        alt: "Featured Honor of Kings hero"
+
+    },
 
 
-  if (!found) {
+    smallTwo: {
 
-    window.alert(
-      "Equipment not found. Please enter one of the listed names."
-    );
+        title: "Featured Build",
 
-    return;
-  }
+        link: "/builds",
+
+        artwork: "",
+
+        alt: "Featured Honor of Kings build"
+
+    }
+
+};
 
 
-  calculatorState.items[index] = found;
+function renderFeaturedContent() {
 
-  renderCalculatorSlots();
-  calculateStats();
+    const mainImage =
+        document.getElementById(
+            "featuredMainImage"
+        );
+
+    const mainTag =
+        document.getElementById(
+            "featuredMainTag"
+        );
+
+    const mainTitle =
+        document.getElementById(
+            "featuredMainTitle"
+        );
+
+    const mainDescription =
+        document.getElementById(
+            "featuredMainDescription"
+        );
+
+    const mainLink =
+        document.getElementById(
+            "featuredMainLink"
+        );
+
+
+    mainTag.textContent =
+        featuredContent.main.tag;
+
+    mainTitle.textContent =
+        featuredContent.main.title;
+
+    mainDescription.textContent =
+        featuredContent.main.description;
+
+    mainLink.href =
+        featuredContent.main.link;
+
+
+    if (featuredContent.main.artwork) {
+
+        loadImage(
+            mainImage,
+            featuredContent.main.artwork,
+            featuredContent.main.alt
+        );
+
+    }
+
+
+    const smallImage1 =
+        document.getElementById(
+            "featuredSmallImage1"
+        );
+
+    const smallTitle1 =
+        document.getElementById(
+            "featuredSmallTitle1"
+        );
+
+    const smallLink1 =
+        document.getElementById(
+            "featuredSmallLink1"
+        );
+
+
+    smallTitle1.textContent =
+        featuredContent.smallOne.title;
+
+    smallLink1.href =
+        featuredContent.smallOne.link;
+
+
+    if (featuredContent.smallOne.artwork) {
+
+        loadImage(
+            smallImage1,
+            featuredContent.smallOne.artwork,
+            featuredContent.smallOne.alt
+        );
+
+    }
+
+
+    const smallImage2 =
+        document.getElementById(
+            "featuredSmallImage2"
+        );
+
+    const smallTitle2 =
+        document.getElementById(
+            "featuredSmallTitle2"
+        );
+
+    const smallLink2 =
+        document.getElementById(
+            "featuredSmallLink2"
+        );
+
+
+    smallTitle2.textContent =
+        featuredContent.smallTwo.title;
+
+    smallLink2.href =
+        featuredContent.smallTwo.link;
+
+
+    if (featuredContent.smallTwo.artwork) {
+
+        loadImage(
+            smallImage2,
+            featuredContent.smallTwo.artwork,
+            featuredContent.smallTwo.alt
+        );
+
+    }
 
 }
 
 
-function calculateStats() {
+/* ============================================================
+   OFFICIAL TOKEN SHOPS
+   ------------------------------------------------------------
+   Empty until exact official URLs are verified.
+   DO NOT put third-party shops here.
+   ============================================================ */
 
-  const hero =
-    HEROES.find(item =>
-      item.id === calculatorState.hero
-    ) || HEROES[0];
+const officialShops = {
 
+    one: {
 
-  const baseStats = {
-    hp: hero.id === "dun" ? 8400 : 7000,
-    attack: hero.id === "diaochan" ? 210 : 240,
-    defense: hero.id === "dun" ? 180 : 140,
-    magicDefense: hero.id === "dun" ? 120 : 110,
-    move: 380,
-    speed: 100
-  };
+        name: "Official Token Shop",
 
+        url: "",
 
-  const equipmentStats = {
-    hp: 0,
-    attack: 0,
-    defense: 0,
-    magicDefense: 0,
-    move: 0,
-    speed: 0
-  };
+        region: "",
+
+        logo: ""
+
+    },
 
 
-  calculatorState.items.forEach(item => {
+    two: {
 
-    if (!item) {
-      return;
+        name: "Official Token Shop",
+
+        url: "",
+
+        region: "",
+
+        logo: ""
+
     }
 
-    if (item.type === "defense") {
-      equipmentStats.hp += 450;
-      equipmentStats.defense += 25;
+};
+
+
+function renderOfficialShops() {
+
+    const shopOne =
+        document.getElementById(
+            "officialShopOne"
+        );
+
+    const shopTwo =
+        document.getElementById(
+            "officialShopTwo"
+        );
+
+
+    if (officialShops.one.url) {
+
+        shopOne.href =
+            officialShops.one.url;
+
+        shopOne.querySelector(
+            "h3"
+        ).textContent =
+            officialShops.one.name;
+
     }
 
-    if (item.type === "attack") {
-      equipmentStats.attack += 55;
+
+    if (officialShops.two.url) {
+
+        shopTwo.href =
+            officialShops.two.url;
+
+        shopTwo.querySelector(
+            "h3"
+        ).textContent =
+            officialShops.two.name;
+
     }
-
-    if (item.type === "magic") {
-      equipmentStats.magicDefense += 35;
-    }
-
-    if (item.type === "movement") {
-      equipmentStats.move += 40;
-    }
-
-  });
-
-
-  const passive = {
-    hp: 0,
-    attack: 0,
-    defense: 0,
-    magicDefense: 0,
-    move: 0,
-    speed: 0
-  };
-
-
-  const finalStats = {
-
-    hp:
-      baseStats.hp +
-      equipmentStats.hp +
-      passive.hp,
-
-    attack:
-      baseStats.attack +
-      equipmentStats.attack +
-      passive.attack,
-
-    defense:
-      baseStats.defense +
-      equipmentStats.defense +
-      passive.defense,
-
-    magicDefense:
-      baseStats.magicDefense +
-      equipmentStats.magicDefense +
-      passive.magicDefense,
-
-    move:
-      baseStats.move +
-      equipmentStats.move +
-      passive.move,
-
-    speed:
-      baseStats.speed +
-      equipmentStats.speed +
-      passive.speed
-
-  };
-
-
-  document.getElementById("statHp").textContent =
-    finalStats.hp.toLocaleString();
-
-  document.getElementById("statAttack").textContent =
-    finalStats.attack.toLocaleString();
-
-  document.getElementById("statDefense").textContent =
-    finalStats.defense.toLocaleString();
-
-  document.getElementById("statMagicDefense").textContent =
-    finalStats.magicDefense.toLocaleString();
-
-  document.getElementById("statMove").textContent =
-    finalStats.move.toLocaleString();
-
-  document.getElementById("statSpeed").textContent =
-    `${finalStats.speed}%`;
-
-
-  document.getElementById("breakdownBase").textContent =
-    "Base Hero";
-
-  document.getElementById("breakdownEquipment").textContent =
-    `+${equipmentStats.hp.toLocaleString()} HP`;
-
-  document.getElementById("breakdownPassive").textContent =
-    "+0";
-
-  document.getElementById("breakdownFinal").textContent =
-    finalStats.hp.toLocaleString();
 
 }
 
 
-document.getElementById("calculatorHero")
-  .addEventListener("change", event => {
+/* ============================================================
+   ACCOUNT UI
+   ------------------------------------------------------------
+   TEMPORARY GUEST STATE.
+   Later connected to Auth.
+   ============================================================ */
 
-    calculatorState.hero = event.target.value;
+function setAccountState(state) {
 
-    calculateStats();
+    const guestMenu =
+        document.getElementById(
+            "guestMenu"
+        );
 
-  });
+    const userMenu =
+        document.getElementById(
+            "userMenu"
+        );
+
+    const adminMenu =
+        document.getElementById(
+            "adminMenu"
+        );
 
 
-document.getElementById("calculatorLevel")
-  .addEventListener("input", event => {
+    guestMenu.hidden =
+        state !== "guest";
 
-    let value =
-      Number.parseInt(event.target.value, 10);
+    userMenu.hidden =
+        state !== "user";
 
-    if (!Number.isFinite(value)) {
-      value = 1;
+    adminMenu.hidden =
+        state !== "admin";
+
+}
+
+
+/* Initial state */
+
+setAccountState("guest");
+
+
+/* ============================================================
+   LOGOUT PLACEHOLDER
+   ============================================================ */
+
+const logoutButton =
+    document.getElementById(
+        "logoutButton"
+    );
+
+
+logoutButton.addEventListener(
+    "click",
+    () => {
+
+        /*
+         * Later:
+         *
+         * await auth.signOut();
+         *
+         * Then redirect to homepage.
+         */
+
+        setAccountState("guest");
+
     }
-
-    value = Math.max(1, Math.min(15, value));
-
-    calculatorState.level = value;
-
-    event.target.value = value;
-
-    calculateStats();
-
-  });
+);
 
 
-document.getElementById("calculateButton")
-  .addEventListener("click", calculateStats);
+/* ============================================================
+   INITIALIZE
+   ============================================================ */
+
+function initializeHomepage() {
+
+    createSlides();
+
+    renderOfficialPatch();
+
+    renderFeaturedContent();
+
+    renderOfficialShops();
+
+    startSlider();
+
+}
 
 
-document.getElementById("resetCalculator")
-  .addEventListener("click", () => {
+/* Start */
 
-    calculatorState.items =
-      [null, null, null, null, null, null];
-
-    renderCalculatorSlots();
-    calculateStats();
-
-  });
-
-
-document.getElementById("saveBuildButton")
-  .addEventListener("click", () => {
-
-    window.alert(
-      "Save Build will connect to the user account system after Supabase integration."
-    );
-
-  });
-
-
-renderCalculatorSlots();
-calculateStats();
-
-
-/* =========================================================
-   AUTH DEMO
-========================================================= */
-
-document.getElementById("loginForm")
-  .addEventListener("submit", event => {
-
-    event.preventDefault();
-
-    window.alert(
-      "Frontend login demo complete. Authentication will be connected to Supabase later."
-    );
-
-  });
-
-
-/* =========================================================
-   LANGUAGE
-========================================================= */
-
-document.getElementById("languageSelect")
-  .addEventListener("change", event => {
-
-    const language = event.target.value;
-
-    window.alert(
-      `${language} selected. Full localization will be connected to the translation database later.`
-    );
-
-  });
-
-
-/* =========================================================
-   UTILITY
-========================================================= */
-
-function escapeHtml(value) {
-
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-
-  }
+initializeHomepage();
