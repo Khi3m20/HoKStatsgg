@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>HoKStat.gg — Honor of Kings Database & Tools</title>
+  <meta
+    name="description"
+    content="Heroes, equipment, builds, calculator, meta, patches, guides and community resources for Honor of Kings."
+  >
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <!-- =========================
+       GLOBAL HEADER
+  ========================== -->
+
+  <header class="site-header">
+    <div class="header-inner">
+
+      <a href="#home" class="brand" data-page="home">
+        <span class="brand-main">HoKStat</span><span class="brand-dot">.gg</span>
+      </a>
+
+      <nav class="desktop-nav" aria-label="Main navigation">
+        <a href="#heroes" data-page="heroes">Heroes</a>
+        <a href="#equipment" data-page="equipment">Equipment</a>
+        <a href="#builds" data-page="builds">Builds</a>
+        <a href="#calculator" data-page="calculator">Calculator</a>
+        <a href="#meta" data-page="meta">Meta</a>
+        <a href="#patches" data-page="patches">Patches</a>
+        <a href="#guides" data-page="guides">Guides</a>
+        <a href="#community" data-page="community">Community</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="icon-button" id="globalSearchButton" type="button" aria-label="Search">
+          ⌕
+        </button>
+
+        <button class="icon-button menu-toggle" id="menuToggle" type="button" aria-label="Open menu">
+          ☰
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+
+  <!-- =========================
+       MOBILE / GLOBAL MENU
+  ========================== -->
+
+  <aside class="side-menu" id="sideMenu" aria-hidden="true">
+
+    <div class="menu-header">
+      <div>
+        <span class="menu-eyebrow">EXPLORE</span>
+        <h2>HoKStat.gg</h2>
+      </div>
+
+      <button class="icon-button" id="menuClose" type="button">×</button>
+    </div>
+
+    <div class="menu-section">
+      <span class="menu-label">Database & Tools</span>
+
+      <a href="#heroes" data-page="heroes">Heroes</a>
+      <a href="#equipment" data-page="equipment">Equipment</a>
+      <a href="#builds" data-page="builds">Builds</a>
+      <a href="#calculator" data-page="calculator">Calculator</a>
+      <a href="#meta" data-page="meta">Meta</a>
+      <a href="#patches" data-page="patches">Patches</a>
+      <a href="#guides" data-page="guides">Guides</a>
+      <a href="#community" data-page="community">Community</a>
+    </div>
+
+    <div class="menu-section">
+      <span class="menu-label">Discover</span>
+
+      <a href="#news" data-page="news">News</a>
+      <a href="#shops" data-page="shops">Official Token Shops</a>
+    </div>
+
+    <div class="menu-section">
+      <span class="menu-label">Account</span>
+
+      <a href="#login" data-page="login">Login / Register</a>
+      <a href="#profile" data-page="profile">Profile</a>
+      <a href="#saved" data-page="saved">Saved Builds</a>
+      <a href="#bookmarks" data-page="bookmarks">Bookmarks</a>
+      <a href="#settings" data-page="settings">Settings</a>
+    </div>
+
+  </aside>
+
+  <div class="menu-overlay" id="menuOverlay"></div>
+
+
+  <!-- =========================
+       SEARCH OVERLAY
+  ========================== -->
+
+  <section class="search-overlay" id="searchOverlay" aria-hidden="true">
+
+    <div class="search-modal">
+
+      <div class="search-top">
+        <div>
+          <span class="eyebrow">GLOBAL SEARCH</span>
+          <h2>Find anything in HoKStat</h2>
+        </div>
+
+        <button class="icon-button" id="searchClose" type="button">×</button>
+      </div>
+
+      <div class="search-box large">
+        <span>⌕</span>
+        <input
+          id="globalSearchInput"
+          type="search"
+          placeholder="Search heroes, equipment, builds, guides..."
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="search-filters">
+        <button class="filter-chip active" data-search-type="all" type="button">All</button>
+        <button class="filter-chip" data-search-type="heroes" type="button">Heroes</button>
+        <button class="filter-chip" data-search-type="equipment" type="button">Equipment</button>
+        <button class="filter-chip" data-search-type="builds" type="button">Builds</button>
+        <button class="filter-chip" data-search-type="guides" type="button">Guides</button>
+        <button class="filter-chip" data-search-type="news" type="button">News</button>
+      </div>
+
+      <div id="searchResults" class="search-results">
+        <div class="search-empty">
+          Start typing to search HoKStat.
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       APP
+  ========================== -->
+
+  <main id="app">
+
+    <!-- HOME -->
+    <section class="page active" id="page-home">
+
+      <section class="cinematic-hero">
+
+        <div class="hero-background" id="heroBackground"></div>
+        <div class="hero-grid"></div>
+        <div class="hero-vignette"></div>
+
+        <div class="hero-content">
+
+          <div class="slide-meta">
+            <span id="slideType">FEATURED HERO</span>
+            <span class="slide-line"></span>
+            <span id="slideCounter">01 / 06</span>
+          </div>
+
+          <h1 id="slideTitle">Dun</h1>
+
+          <p class="hero-subtitle" id="slideSubtitle">
+            Tank · Clash Lane
+          </p>
+
+          <p class="hero-description" id="slideDescription">
+            Explore hero stats, skills, builds and everything you need to understand Dun.
+          </p>
+
+          <div class="hero-actions">
+            <button class="primary-button" id="slidePrimaryButton" type="button">
+              Explore Hero
+            </button>
+
+            <button class="secondary-button" id="slideSecondaryButton" type="button">
+              View Database
+            </button>
+          </div>
+
+        </div>
+
+        <div class="slider-controls">
+
+          <button class="slider-arrow" id="slidePrev" type="button" aria-label="Previous slide">
+            ←
+          </button>
+
+          <div class="slider-dots" id="sliderDots"></div>
+
+          <button class="slider-arrow" id="slideNext" type="button" aria-label="Next slide">
+            →
+          </button>
+
+        </div>
+
+        <!-- Official patch corner widget -->
+        <aside class="patch-corner">
+
+          <div class="patch-corner-top">
+            <span class="status-dot"></span>
+            <span>OFFICIAL PATCH NOTES</span>
+          </div>
+
+          <strong>Latest Update · Global</strong>
+
+          <p>
+            Structured patch information and official source reference.
+          </p>
+
+          <button
+            type="button"
+            class="text-button"
+            data-page="patches"
+          >
+            Read More →
+          </button>
+
+        </aside>
+
+      </section>
+
+
+      <!-- QUICK SEARCH -->
+      <section class="quick-search-section">
+
+        <div class="quick-search-heading">
+          <span class="eyebrow">QUICK SEARCH</span>
+          <h2>What are you looking for?</h2>
+        </div>
+
+        <div class="quick-search">
+
+          <span>⌕</span>
+
+          <input
+            id="homeSearchInput"
+            type="search"
+            placeholder="Search heroes, equipment, builds, guides..."
+            autocomplete="off"
+          >
+
+          <button id="homeSearchButton" type="button">
+            Search
+          </button>
+
+        </div>
+
+        <div class="suggestion-row">
+          <button type="button" data-search-suggestion="Dun">Dun</button>
+          <button type="button" data-search-suggestion="Tank">Tank</button>
+          <button type="button" data-search-suggestion="Build">Builds</button>
+          <button type="button" data-search-suggestion="Equipment">Equipment</button>
+        </div>
+
+      </section>
+
+
+      <!-- EXPLORE -->
+      <section class="explore-section">
+
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">EXPLORE HOKSTAT</span>
+            <h2>Database & Tools</h2>
+          </div>
+        </div>
+
+        <div class="explore-grid">
+
+          <button class="explore-card" data-page="heroes" type="button">
+            <span class="explore-icon">◆</span>
+            <span>
+              <strong>Heroes</strong>
+              <small>Stats, skills, skins & history</small>
+            </span>
+            <b>→</b>
+          </button>
+
+          <button class="explore-card" data-page="equipment" type="button">
+            <span class="explore-icon">◇</span>
+            <span>
+              <strong>Equipment</strong>
+              <small>Stats, passives & build paths</small>
+            </span>
+            <b>→</b>
+          </button>
+
+          <button class="explore-card" data-page="builds" type="button">
+            <span class="explore-icon">▣</span>
+            <span>
+              <strong>Builds</strong>
+              <small>Recommended & community builds</small>
+            </span>
+            <b>→</b>
+          </button>
+
+          <button class="explore-card featured" data-page="calculator" type="button">
+            <span class="explore-icon">＋</span>
+            <span>
+              <strong>Calculator</strong>
+              <small>Build your own 6-slot setup</small>
+            </span>
+            <b>→</b>
+          </button>
+
+          <button class="explore-card" data-page="meta" type="button">
+            <span class="explore-icon">↗</span>
+            <span>
+              <strong>Meta</strong>
+              <small>Win, pick, ban & trends</small>
+            </span>
+            <b>→</b>
+          </button>
+
+          <button class="explore-card" data-page="patches" type="button">
+            <span class="explore-icon">◈</span>
+            <span>
+              <strong>Patches</strong>
+              <small>Changes & version history</small>
+            </span>
+            <b>→</b>
+          </button>
+
+          <button class="explore-card" data-page="guides" type="button">
+            <span class="explore-icon">▤</span>
+            <span>
+              <strong>Guides</strong>
+              <small>Beginner to advanced</small>
+            </span>
+            <b>→</b>
+          </button>
+
+          <button class="explore-card" data-page="community" type="button">
+            <span class="explore-icon">◎</span>
+            <span>
+              <strong>Community</strong>
+              <small>Questions, answers & discussion</small>
+            </span>
+            <b>→</b>
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <!-- DISCOVER -->
+      <section class="discover-section">
+
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">DISCOVER</span>
+            <h2>Latest & Featured</h2>
+          </div>
+
+          <button class="text-button" data-page="news" type="button">
+            View News →
+          </button>
+        </div>
+
+        <div class="discover-grid">
+
+          <article class="feature-panel large">
+            <div class="panel-tag">FEATURED HERO</div>
+            <h3>Dun</h3>
+            <p>
+              Explore the hero database, recommended builds and calculator.
+            </p>
+            <button class="secondary-button" data-page="heroes" type="button">
+              Explore
+            </button>
+          </article>
+
+          <article class="feature-panel">
+            <div class="panel-tag">LATEST BUILD</div>
+            <h3>Standard Tank</h3>
+            <p>Six-slot build with calculated final stats.</p>
+            <button class="text-button" data-page="builds" type="button">
+              View Build →
+            </button>
+          </article>
+
+          <article class="feature-panel">
+            <div class="panel-tag">LATEST GUIDE</div>
+            <h3>Hero Fundamentals</h3>
+            <p>Learn the basics before going deeper.</p>
+            <button class="text-button" data-page="guides" type="button">
+              Read Guide →
+            </button>
+          </article>
+
+        </div>
+
+      </section>
+
+
+      <!-- ADS -->
+      <section class="ad-slot home-ad">
+        <span>ADVERTISEMENT</span>
+      </section>
+
+    </section>
+
+
+    <!-- HEROES -->
+    <section class="page" id="page-heroes">
+
+      <div class="page-hero">
+        <div>
+          <span class="eyebrow">DATABASE</span>
+          <h1>Heroes</h1>
+          <p>Explore heroes, stats, skills, builds and patch history.</p>
+        </div>
+
+        <button class="primary-button" data-page="calculator" type="button">
+          Open Calculator
+        </button>
+      </div>
+
+      <div class="toolbar">
+
+        <div class="search-box">
+          <span>⌕</span>
+          <input id="heroSearch" type="search" placeholder="Search heroes...">
+        </div>
+
+        <select id="heroRoleFilter">
+          <option value="all">All Roles</option>
+          <option value="tank">Tank</option>
+          <option value="fighter">Fighter</option>
+          <option value="assassin">Assassin</option>
+          <option value="mage">Mage</option>
+          <option value="marksman">Marksman</option>
+          <option value="support">Support</option>
+        </select>
+
+        <select id="heroLaneFilter">
+          <option value="all">All Lanes</option>
+          <option value="clash">Clash</option>
+          <option value="jungle">Jungle</option>
+          <option value="mid">Mid</option>
+          <option value="farm">Farm</option>
+          <option value="roamer">Roamer</option>
+        </select>
+
+      </div>
+
+      <div id="heroGrid" class="hero-grid-cards"></div>
+
+    </section>
+
+
+    <!-- EQUIPMENT -->
+    <section class="page" id="page-equipment">
+
+      <div class="page-hero">
+        <div>
+          <span class="eyebrow">DATABASE</span>
+          <h1>Equipment</h1>
+          <p>Explore item stats, passives and build paths.</p>
+        </div>
+
+        <button class="primary-button" data-page="calculator" type="button">
+          Build Equipment
+        </button>
+      </div>
+
+      <div class="toolbar">
+
+        <div class="search-box">
+          <span>⌕</span>
+          <input id="equipmentSearch" type="search" placeholder="Search equipment...">
+        </div>
+
+        <select id="equipmentTypeFilter">
+          <option value="all">All Types</option>
+          <option value="attack">Attack</option>
+          <option value="defense">Defense</option>
+          <option value="magic">Magic</option>
+          <option value="movement">Movement</option>
+        </select>
+
+      </div>
+
+      <div id="equipmentGrid" class="equipment-grid"></div>
+
+    </section>
+
+
+    <!-- BUILDS -->
+    <section class="page" id="page-builds">
+
+      <div class="page-hero">
+        <div>
+          <span class="eyebrow">BUILD DATABASE</span>
+          <h1>Builds</h1>
+          <p>Recommended setups and future community builds.</p>
+        </div>
+
+        <button class="primary-button" data-page="calculator" type="button">
+          Create Build
+        </button>
+      </div>
+
+      <div class="content-tabs">
+        <button class="content-tab active" type="button">Recommended</button>
+        <button class="content-tab" type="button">Community</button>
+        <button class="content-tab" type="button">Popular</button>
+      </div>
+
+      <div class="build-list">
+
+        <article class="build-card">
+          <div class="build-number">01</div>
+          <div class="build-info">
+            <span class="panel-tag">DUN · TANK</span>
+            <h3>Standard Tank</h3>
+            <p>Balanced defensive setup for standard games.</p>
+          </div>
+          <div class="build-items">
+            <span>01</span>
+            <span>02</span>
+            <span>03</span>
+            <span>04</span>
+            <span>05</span>
+            <span>06</span>
+          </div>
+          <button class="secondary-button" data-page="calculator" type="button">
+            Try Build
+          </button>
+        </article>
+
+        <article class="build-card">
+          <div class="build-number">02</div>
+          <div class="build-info">
+            <span class="panel-tag">DUN · DEFENSE</span>
+            <h3>Anti-Magic</h3>
+            <p>Defensive variation focused on magical damage.</p>
+          </div>
+          <div class="build-items">
+            <span>01</span>
+            <span>02</span>
+            <span>03</span>
+            <span>04</span>
+            <span>05</span>
+            <span>06</span>
+          </div>
+          <button class="secondary-button" data-page="calculator" type="button">
+            Try Build
+          </button>
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- CALCULATOR -->
+    <section class="page" id="page-calculator">
+
+      <div class="page-hero">
+        <div>
+          <span class="eyebrow">BUILD ENGINE</span>
+          <h1>Equipment Calculator</h1>
+          <p>Choose a hero and freely build a six-slot setup.</p>
+        </div>
+
+        <button class="secondary-button" id="resetCalculator" type="button">
+          Reset Build
+        </button>
+      </div>
+
+      <div class="calculator-layout">
+
+        <section class="calculator-build">
+
+          <div class="calculator-top">
+            <label>
+              Hero
+              <select id="calculatorHero">
+                <option value="dun">Dun</option>
+                <option value="arthur">Arthur</option>
+                <option value="diaochan">Diao Chan</option>
+              </select>
+            </label>
+
+            <label>
+              Level
+              <input id="calculatorLevel" type="number" min="1" max="15" value="15">
+            </label>
+          </div>
+
+          <div class="slot-grid" id="calculatorSlots"></div>
+
+          <div class="calculator-actions">
+            <button class="primary-button" id="calculateButton" type="button">
+              Calculate Stats
+            </button>
+
+            <button class="secondary-button" id="saveBuildButton" type="button">
+              Save Build
+            </button>
+          </div>
+
+        </section>
+
+
+        <section class="stats-panel">
+
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">RESULT</span>
+              <h2>Final Stats</h2>
+            </div>
+          </div>
+
+          <div class="stat-result-grid">
+
+            <div class="stat-result">
+              <span>HP</span>
+              <strong id="statHp">8,400</strong>
+            </div>
+
+            <div class="stat-result">
+              <span>Physical Attack</span>
+              <strong id="statAttack">240</strong>
+            </div>
+
+            <div class="stat-result">
+              <span>Physical Defense</span>
+              <strong id="statDefense">180</strong>
+            </div>
+
+            <div class="stat-result">
+              <span>Magic Defense</span>
+              <strong id="statMagicDefense">120</strong>
+            </div>
+
+            <div class="stat-result">
+              <span>Movement Speed</span>
+              <strong id="statMove">380</strong>
+            </div>
+
+            <div class="stat-result">
+              <span>Attack Speed</span>
+              <strong id="statSpeed">100%</strong>
+            </div>
+
+          </div>
+
+          <div class="breakdown">
+
+            <div class="breakdown-row">
+              <span>Base Hero</span>
+              <strong id="breakdownBase">0</strong>
+            </div>
+
+            <div class="breakdown-row">
+              <span>Equipment</span>
+              <strong id="breakdownEquipment">0</strong>
+            </div>
+
+            <div class="breakdown-row">
+              <span>Passive Effects</span>
+              <strong id="breakdownPassive">0</strong>
+            </div>
+
+            <div class="breakdown-row total">
+              <span>Final</span>
+              <strong id="breakdownFinal">0</strong>
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+
+    </section>
+
+
+    <!-- META -->
+    <section class="page" id="page-meta">
+
+      <div class="page-hero">
+        <div>
+          <span class="eyebrow">COMMUNITY DATA</span>
+          <h1>Meta</h1>
+          <p>Win rate, pick rate, ban rate and trends from verified sources.</p>
+        </div>
+
+        <span class="data-status">SOURCE REQUIRED</span>
+      </div>
+
+      <div class="content-tabs">
+        <button class="content-tab active" type="button">Overview</button>
+        <button class="content-tab" type="button">Clash</button>
+        <button class="content-tab" type="button">Jungle</button>
+        <button class="content-tab" type="button">Mid</button>
+        <button class="content-tab" type="button">Farm</button>
+        <button class="content-tab" type="button">Roamer</button>
+      </div>
+
+      <div class="meta-table">
+
+        <div class="meta-row meta-header">
+          <span>Hero</span>
+          <span>Win Rate</span>
+          <span>Pick Rate</span>
+          <span>Ban Rate</span>
+          <span>Trend</span>
+        </div>
+
+        <div class="meta-row">
+          <strong>Dun</strong>
+          <span>—</span>
+          <span>—</span>
+          <span>—</span>
+          <span class="muted">Unavailable</span>
+        </div>
+
+        <div class="meta-row">
+          <strong>Arthur</strong>
+          <span>—</span>
+          <span>—</span>
+          <span>—</span>
+          <span class="muted">Unavailable</span>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- PATCHES -->
+    <section class="page" id="page-patches">
+
+      <div class="page-hero">
+        <div>
+          <span class="eyebrow">VERSION HISTORY</span>
+          <h1>Patches</h1>
+          <p>Official updates and structured historical changes.</p>
+        </div>
+      </div>
+
+      <div class="patch-layout">
+
+        <article class="patch-feature">
+
+          <span class="panel-tag">LATEST OFFICIAL UPDATE</span>
+
+          <h2>Current Global Version</h2>
+
+          <p>
+            Official patch information will appear here after source verification.
+          </p>
+
+          <div class="patch-meta">
+            <span>Version —</span>
+            <span>Date —</span>
+            <span>Source —</span>
+          </div>
+
+          <button class="primary-button" type="button">
+            Official Patch Notes
+          </button>
+
+        </article>
+
+        <div class="timeline">
+
+          <article class="timeline-item">
+            <span>PATCH</span>
+            <h3>Previous Version</h3>
+            <p>Historical changes are preserved instead of overwritten.</p>
+          </article>
+
+          <article class="timeline-item">
+            <span>HISTORY</span>
+            <h3>Change History</h3>
+            <p>Old → new values can be tracked through the database.</p>
+          </article>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- GUIDES -->
+    <section class="page" id="page-guides">
+
+      <div class="page-hero">
+        <div>
+          <span class="eyebrow">KNOWLEDGE BASE</span>
+          <h1>Guides</h1>
+          <p>From beginner fundamentals to advanced gameplay.</p>
+        </div>
+      </div>
+
+      <div class="guide-grid">
+
+        <article class="guide-card">
+          <span class="panel-tag">BEGINNER</span>
+          <h3>Understanding Roles</h3>
+          <p>Learn the core responsibilities of every role.</p>
+          <button class="text-button" type="button">Read Guide →</button>
+        </article>
+
+        <article class="guide-card">
+          <span class="panel-tag">HERO</span>
+          <h3>Dun Fundamentals</h3>
+          <p>Passive, skills, strengths and practical usage.</p>
+          <button class="text-button" type="button">Read Guide →</button>
+        </article>
+
+        <article class="guide-card">
+          <span class="panel-tag">ADVANCED</span>
+          <h3>Teamfight Fundamentals</h3>
+          <p>Positioning, timing and engagement concepts.</p>
+          <button class="text-button" type="button">Read Guide →</button>
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- COMMUNITY -->
+    <section class="page" id="page-community">
+
+      <div class="page-hero">
+        <div>
+          <span class="eyebrow">COMMUNITY</span>
+          <h1>Questions & Discussion</h1>
+          <p>Ask questions, share answers and discuss Honor of Kings.</p>
+        </div>
+
+        <button class="primary-button" data-page="login" type="button">
+          Login to Contribute
+        </button>
+      </div>
+
+      <div class="community-toolbar">
+        <button class="content-tab active" type="button">Recent</button>
+        <button class="content-tab" type="button">Popular</button>
+        <button class="content-tab" type="button">Unanswered</button>
+      </div>
+
+      <div class="question-list">
+
+        <article class="question-card">
+          <div class="question-stats">
+            <strong>0</strong>
+            <small>answers</small>
+          </div>
+
+          <div>
+            <span class="panel-tag">GENERAL</span>
+            <h3>How does the calculator handle passive effects?</h3>
+            <p>Community question placeholder.</p>
+          </div>
+
+          <span class="question-status">OPEN</span>
+        </article>
+
+        <article class="question-card">
+          <div class="question-stats">
+            <strong>0</strong>
+            <small>answers</small>
+          </div>
+
+          <div>
+            <span class="panel-tag">HEROES</span>
+            <h3>What should I build on Dun?</h3>
+            <p>Community question placeholder.</p>
+          </div>
+
+          <span class="question-status">OPEN</span>
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- NEWS -->
+    <section class="page" id="page-news">
+
+      <div class="page-hero">
+        <div>
+          <span class="eyebrow">DISCOVER</span>
+          <h1>News</h1>
+          <p>Official announcements, upcoming content and clearly marked rumors.</p>
+        </div>
+      </div>
+
+      <div class="news-grid">
+
+        <article class="news-card">
+          <span class="news-type official">OFFICIAL</span>
+          <h3>Latest Official Announcement</h3>
+          <p>Verified official content will appear here.</p>
+          <small>Source / Date —</small>
+        </article>
+
+        <article class="news-card">
+          <span class="news-type upcoming">COMING SOON</span>
+          <h3>Upcoming Content</h3>
+          <p>Only officially announced future content.</p>
+          <small>Source / Date —</small>
+        </article>
+
+        <article class="news-card">
+          <span class="news-type rumor">UNCONFIRMED</span>
+          <h3>Leaks & Rumors</h3>
+          <p>Never treated as live database information.</p>
+          <small>Source / Date —</small>
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- SHOPS -->
+    <section class="page" id="page-shops">
+
+      <div class="page-hero">
+        <div>
+          <span class="eyebrow">OFFICIAL ONLY</span>
+          <h1>Official Token Shops</h1>
+          <p>HoKStat only displays verified official Honor of Kings shops.</p>
+        </div>
+      </div>
+
+      <div class="shop-grid">
+
+        <article class="shop-card">
+          <span class="verified">✓ VERIFIED OFFICIAL</span>
+          <h3>Official Token Shop</h3>
+          <p>Official external shop link will be displayed after URL verification.</p>
+          <button class="secondary-button" type="button">
+            Visit Official Shop
+          </button>
+        </article>
+
+        <article class="shop-card">
+          <span class="verified">✓ VERIFIED OFFICIAL</span>
+          <h3>Official Regional Shop</h3>
+          <p>Regional official shop link will be displayed after verification.</p>
+          <button class="secondary-button" type="button">
+            Visit Official Shop
+          </button>
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- LOGIN -->
+    <section class="page" id="page-login">
+
+      <div class="auth-layout">
+
+        <div class="auth-intro">
+          <span class="eyebrow">ACCOUNT</span>
+          <h1>Your HoKStat account.</h1>
+          <p>
+            Save builds, bookmark content and participate in the community.
+          </p>
+        </div>
+
+        <form class="auth-card" id="loginForm">
+
+          <h2>Login</h2>
+
+          <label>
+            Email
+            <input type="email" required placeholder="you@example.com">
+          </label>
+
+          <label>
+            Password
+            <input type="password" required placeholder="Password">
+          </label>
+
+          <button class="primary-button" type="submit">
+            Login
+          </button>
+
+          <button class="text-button" type="button">
+            Forgot password?
+          </button>
+
+          <div class="auth-divider">
+            <span>OR</span>
+          </div>
+
+          <button class="secondary-button" type="button">
+            Create Account
+          </button>
+
+        </form>
+
+      </div>
+
+    </section>
+
+
+    <!-- PROFILE -->
+    <section class="page" id="page-profile">
+
+      <div class="page-hero">
+        <div>
+          <span class="eyebrow">ACCOUNT</span>
+          <h1>Profile</h1>
+          <p>Manage your HoKStat identity and community activity.</p>
+        </div>
+      </div>
+
+      <div class="profile-panel">
+        <div class="profile-avatar">NN</div>
+
+        <div>
+          <span class="panel-tag">USER</span>
+          <h2>NoName</h2>
+          <p>Member since 2026</p>
+        </div>
+
+        <button class="secondary-button" data-page="settings" type="button">
+          Account Settings
+        </button>
+      </div>
+
+    </section>
+
+
+    <!-- SAVED -->
+    <section class="page" id="page-saved">
+
+      <div class="page-hero">
+        <div>
+          <span class="eyebrow">ACCOUNT</span>
+          <h1>Saved Builds</h1>
+          <p>Your saved calculator builds will appear here.</p>
+        </div>
+      </div>
+
+      <div class="empty-panel">
+        <strong>No saved builds yet.</strong>
+        <p>Build something in the calculator and save it here.</p>
+        <button class="primary-button" data-page="calculator" type="button">
+          Open Calculator
+        </button>
+      </div>
+
+    </section>
+
+
+    <!-- BOOKMARKS -->
+    <section class="page" id="page-bookmarks">
+
+      <div class="page-hero">
+        <div>
+          <span class="eyebrow">ACCOUNT</span>
+          <h1>Bookmarks</h1>
+          <p>Saved heroes, equipment, guides and news.</p>
+        </div>
+      </div>
+
+      <div class="empty-panel">
+        <strong>No bookmarks yet.</strong>
+        <p>Saved content will appear here.</p>
+      </div>
+
+    </section>
+
+
+    <!-- SETTINGS -->
+    <section class="page" id="page-settings">
+
+      <div class="page-hero">
+        <div>
+          <span class="eyebrow">ACCOUNT</span>
+          <h1>Settings</h1>
+          <p>Language, appearance and account preferences.</p>
+        </div>
+      </div>
+
+      <div class="settings-panel">
+
+        <label>
+          Language
+          <select id="languageSelect">
+            <option>English</option>
+            <option>Vietnamese</option>
+            <option>Chinese</option>
+            <option>French</option>
+            <option>Malay</option>
+            <option>Indonesian</option>
+            <option>Filipino</option>
+            <option>Japanese</option>
+            <option>Spanish</option>
+          </select>
+        </label>
+
+        <div class="setting-row">
+          <div>
+            <strong>Reduced Motion</strong>
+            <p>Reduce non-essential animations.</p>
+          </div>
+
+          <input type="checkbox" id="reducedMotion">
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- =========================
+       FOOTER
+  ========================== -->
+
+  <footer class="site-footer">
+
+    <div class="footer-main">
+
+      <div>
+        <a href="#home" class="brand">
+          <span class="brand-main">HoKStat</span><span class="brand-dot">.gg</span>
+        </a>
+
+        <p>
+          Honor of Kings database, tools and community resources.
+        </p>
+      </div>
+
+      <div class="footer-links">
+
+        <div>
+          <strong>Explore</strong>
+          <a href="#heroes">Heroes</a>
+          <a href="#equipment">Equipment</a>
+          <a href="#builds">Builds</a>
+          <a href="#calculator">Calculator</a>
+        </div>
+
+        <div>
+          <strong>Resources</strong>
+          <a href="#meta">Meta</a>
+          <a href="#patches">Patches</a>
+          <a href="#guides">Guides</a>
+          <a href="#community">Community</a>
+        </div>
+
+        <div>
+          <strong>Discover</strong>
+          <a href="#news">News</a>
+          <a href="#shops">Official Shops</a>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 HoKStat.gg · Created & maintained by NoName</span>
+      <span>Honor of Kings is a trademark of Tencent. HoKStat.gg is an independent project.</span>
+    </div>
+
+  </footer>
+
+
+  <script src="script.js"></script>
+
+</body>
+            </html>
