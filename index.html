@@ -1,1084 +1,786 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+  <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
-    <meta
-        name="description"
-        content="HoKStat.gg — Honor of Kings Database & Tools"
-    >
+  <meta
+    name="theme-color"
+    content="#06090F"
+  >
 
-    <meta name="theme-color" content="#06090F">
+  <meta
+    name="description"
+    content="Heroes, equipment, builds, calculator, meta, patches, guides and community resources for Honor of Kings."
+  >
 
-    <title>HoKStat.gg — Honor of Kings Database & Tools</title>
+  <title>HoKStat.gg — Honor of Kings Database & Tools</title>
 
-    <link rel="stylesheet" href="style.css">
+  <link
+    rel="stylesheet"
+    href="css/style.css"
+  >
 </head>
 
 <body>
 
-    <!-- =========================================================
-         BACKGROUND
-         ========================================================= -->
+  <!-- =====================================================
+       HEADER
+  ====================================================== -->
 
-    <div class="site-background" aria-hidden="true">
-        <div class="background-grid"></div>
-        <div class="background-glow glow-one"></div>
-        <div class="background-glow glow-two"></div>
-        <div class="background-line line-one"></div>
-        <div class="background-line line-two"></div>
+  <header class="site-header">
+
+    <div class="header-inner">
+
+      <a
+        href="index.html"
+        class="brand"
+        aria-label="HoKStat.gg Home"
+      >
+        <span class="brand-main">HoKStat</span><span class="brand-dot">.gg</span>
+      </a>
+
+
+      <nav
+        class="desktop-nav"
+        aria-label="Main navigation"
+      >
+
+        <a href="heroes/index.html">Heroes</a>
+        <a href="equipment/index.html">Equipment</a>
+        <a href="builds/index.html">Builds</a>
+        <a href="calculator/index.html">Calculator</a>
+        <a href="meta/index.html">Meta</a>
+        <a href="patches/index.html">Patches</a>
+        <a href="guides/index.html">Guides</a>
+        <a href="community/index.html">Community</a>
+
+      </nav>
+
+
+      <button
+        class="mobile-menu-button"
+        id="mobileMenuButton"
+        type="button"
+        aria-label="Open navigation menu"
+        aria-expanded="false"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- =====================================================
+       MOBILE NAV
+  ====================================================== -->
+
+  <aside
+    class="mobile-nav"
+    id="mobileNav"
+    aria-hidden="true"
+  >
+
+    <div class="mobile-nav-top">
+
+      <span class="mobile-nav-title">
+        MENU
+      </span>
+
+      <button
+        id="mobileNavClose"
+        type="button"
+        aria-label="Close navigation"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <a href="heroes/index.html">Heroes</a>
+    <a href="equipment/index.html">Equipment</a>
+    <a href="builds/index.html">Builds</a>
+    <a href="calculator/index.html">Calculator</a>
+    <a href="meta/index.html">Meta</a>
+    <a href="patches/index.html">Patches</a>
+    <a href="guides/index.html">Guides</a>
+    <a href="community/index.html">Community</a>
+    <a href="news/index.html">News</a>
+
+  </aside>
+
+
+  <main>
+
+    <!-- ===================================================
+         CINEMATIC SLIDER
+    ==================================================== -->
+
+    <section
+      class="cinematic-slider"
+      id="homeSlider"
+      aria-label="HoKStat featured content"
+    >
+
+      <!-- SLIDE 1 -->
+
+      <article
+        class="cinematic-slide active"
+        data-slide-type="hero"
+      >
+
+        <div class="cinematic-art art-hero"></div>
+
+        <div class="cinematic-overlay"></div>
+
+        <div class="cinematic-content">
+
+          <div class="eyebrow">
+            HERO DATABASE
+          </div>
+
+          <h1>
+            Explore the Heroes
+            of Honor of Kings
+          </h1>
+
+          <p>
+            Discover hero abilities, stats, builds,
+            equipment, skins and verified game data.
+          </p>
+
+          <a
+            href="heroes/index.html"
+            class="btn btn-primary"
+          >
+            EXPLORE HEROES
+          </a>
+
+        </div>
+
+      </article>
+
+
+      <!-- SLIDE 2 -->
+
+      <article
+        class="cinematic-slide"
+        data-slide-type="build"
+      >
+
+        <div class="cinematic-art art-build"></div>
+
+        <div class="cinematic-overlay"></div>
+
+        <div class="cinematic-content">
+
+          <div class="eyebrow">
+            BUILDS
+          </div>
+
+          <h1>
+            Build.
+            Compare.
+            Experiment.
+          </h1>
+
+          <p>
+            Explore recommended builds and test
+            six equipment slots with the calculator.
+          </p>
+
+          <a
+            href="builds/index.html"
+            class="btn btn-primary"
+          >
+            EXPLORE BUILDS
+          </a>
+
+        </div>
+
+      </article>
+
+
+      <!-- SLIDE 3 -->
+
+      <article
+        class="cinematic-slide"
+        data-slide-type="patch"
+      >
+
+        <div class="cinematic-art art-patch"></div>
+
+        <div class="cinematic-overlay"></div>
+
+        <div class="cinematic-content">
+
+          <div class="eyebrow">
+            PATCH HISTORY
+          </div>
+
+          <h1>
+            Track Every
+            Major Update
+          </h1>
+
+          <p>
+            Follow hero changes, equipment changes,
+            system updates and new content.
+          </p>
+
+          <a
+            href="patches/index.html"
+            class="btn btn-primary"
+          >
+            VIEW PATCHES
+          </a>
+
+        </div>
+
+      </article>
+
+
+      <!-- SLIDE 4 -->
+
+      <article
+        class="cinematic-slide"
+        data-slide-type="equipment"
+      >
+
+        <div class="cinematic-art art-equipment"></div>
+
+        <div class="cinematic-overlay"></div>
+
+        <div class="cinematic-content">
+
+          <div class="eyebrow">
+            EQUIPMENT
+          </div>
+
+          <h1>
+            Know Every
+            Piece of Equipment
+          </h1>
+
+          <p>
+            Prices, stats, passives, build paths
+            and equipment interactions.
+          </p>
+
+          <a
+            href="equipment/index.html"
+            class="btn btn-primary"
+          >
+            VIEW EQUIPMENT
+          </a>
+
+        </div>
+
+      </article>
+
+
+      <!-- SLIDE 5 -->
+
+      <article
+        class="cinematic-slide"
+        data-slide-type="guide"
+      >
+
+        <div class="cinematic-art art-guide"></div>
+
+        <div class="cinematic-overlay"></div>
+
+        <div class="cinematic-content">
+
+          <div class="eyebrow">
+            GUIDES
+          </div>
+
+          <h1>
+            Learn the Game
+            Beyond the Numbers
+          </h1>
+
+          <p>
+            Hero guides, beginner resources,
+            gameplay knowledge and advanced strategy.
+          </p>
+
+          <a
+            href="guides/index.html"
+            class="btn btn-primary"
+          >
+            READ GUIDES
+          </a>
+
+        </div>
+
+      </article>
+
+
+      <!-- SLIDE 6 -->
+
+      <article
+        class="cinematic-slide"
+        data-slide-type="news"
+      >
+
+        <div class="cinematic-art art-news"></div>
+
+        <div class="cinematic-overlay"></div>
+
+        <div class="cinematic-content">
+
+          <div class="eyebrow">
+            NEWS
+          </div>
+
+          <h1>
+            Stay Updated
+            With HoK
+          </h1>
+
+          <p>
+            Official announcements, upcoming content
+            and clearly separated unconfirmed information.
+          </p>
+
+          <a
+            href="news/index.html"
+            class="btn btn-primary"
+          >
+            VIEW NEWS
+          </a>
+
+        </div>
+
+      </article>
+
+
+      <!-- SLIDER ARROWS -->
+
+      <button
+        class="slider-arrow slider-prev"
+        id="sliderPrev"
+        type="button"
+        aria-label="Previous slide"
+      >
+        ‹
+      </button>
+
+      <button
+        class="slider-arrow slider-next"
+        id="sliderNext"
+        type="button"
+        aria-label="Next slide"
+      >
+        ›
+      </button>
+
+
+      <!-- SLIDER DOTS -->
+
+      <div
+        class="slider-dots"
+        id="sliderDots"
+      ></div>
+
+
+      <!-- SLIDER PROGRESS -->
+
+      <div class="slider-progress">
+        <div
+          class="slider-progress-bar"
+          id="sliderProgressBar"
+        ></div>
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         QUICK SEARCH
+    ==================================================== -->
+
+    <section class="home-search">
+
+      <div class="home-search-copy">
+
+        <div class="eyebrow">
+          QUICK SEARCH
+        </div>
+
+        <h2>
+          Find it on HoKStat.gg
+        </h2>
+
+        <p>
+          Search heroes, equipment, builds,
+          patches, guides and more.
+        </p>
+
+      </div>
+
+
+      <div class="global-search">
+
+        <div class="search-input-wrap">
+
+          <span class="search-symbol">
+            /
+          </span>
+
+          <input
+            type="search"
+            id="globalSearch"
+            placeholder="Search HoKStat.gg..."
+            autocomplete="off"
+          >
+
+        </div>
+
+        <button
+          id="globalSearchButton"
+          class="btn btn-primary search-button"
+          type="button"
+        >
+          SEARCH
+        </button>
+
+      </div>
+
+
+      <div
+        class="search-results"
+        id="searchResults"
+      ></div>
+
+    </section>
+
+
+    <!-- ===================================================
+         EXPLORE
+    ==================================================== -->
+
+    <section class="explore-section">
+
+      <div class="section-heading">
+
+        <div>
+
+          <div class="eyebrow">
+            EXPLORE
+          </div>
+
+          <h2>
+            Everything in one place.
+          </h2>
+
+        </div>
+
+        <p>
+          A growing Honor of Kings database,
+          toolkit and community hub.
+        </p>
+
+      </div>
+
+
+      <div class="explore-grid">
+
+
+        <a
+          href="heroes/index.html"
+          class="explore-card"
+        >
+
+          <div class="explore-index">01</div>
+
+          <div class="explore-card-content">
+
+            <h3>Heroes</h3>
+
+            <p>
+              Skills, stats, skins,
+              builds and more.
+            </p>
+
+          </div>
+
+          <span class="explore-arrow">→</span>
+
+        </a>
+
+
+        <a
+          href="equipment/index.html"
+          class="explore-card"
+        >
+
+          <div class="explore-index">02</div>
+
+          <div class="explore-card-content">
+
+            <h3>Equipment</h3>
+
+            <p>
+              Stats, passives,
+              prices and build paths.
+            </p>
+
+          </div>
+
+          <span class="explore-arrow">→</span>
+
+        </a>
+
+
+        <a
+          href="builds/index.html"
+          class="explore-card"
+        >
+
+          <div class="explore-index">03</div>
+
+          <div class="explore-card-content">
+
+            <h3>Builds</h3>
+
+            <p>
+              Recommended and
+              community builds.
+            </p>
+
+          </div>
+
+          <span class="explore-arrow">→</span>
+
+        </a>
+
+
+        <a
+          href="calculator/index.html"
+          class="explore-card explore-featured"
+        >
+
+          <div class="explore-index">04</div>
+
+          <div class="explore-card-content">
+
+            <h3>Calculator</h3>
+
+            <p>
+              Build six slots and
+              calculate final stats.
+            </p>
+
+          </div>
+
+          <span class="explore-arrow">→</span>
+
+        </a>
+
+
+        <a
+          href="meta/index.html"
+          class="explore-card"
+        >
+
+          <div class="explore-index">05</div>
+
+          <div class="explore-card-content">
+
+            <h3>Meta</h3>
+
+            <p>
+              Role performance,
+              trends and builds.
+            </p>
+
+          </div>
+
+          <span class="explore-arrow">→</span>
+
+        </a>
+
+
+        <a
+          href="patches/index.html"
+          class="explore-card"
+        >
+
+          <div class="explore-index">06</div>
+
+          <div class="explore-card-content">
+
+            <h3>Patches</h3>
+
+            <p>
+              Version history and
+              balance changes.
+            </p>
+
+          </div>
+
+          <span class="explore-arrow">→</span>
+
+        </a>
+
+
+        <a
+          href="guides/index.html"
+          class="explore-card"
+        >
+
+          <div class="explore-index">07</div>
+
+          <div class="explore-card-content">
+
+            <h3>Guides</h3>
+
+            <p>
+              Beginner, hero and
+              advanced guides.
+            </p>
+
+          </div>
+
+          <span class="explore-arrow">→</span>
+
+        </a>
+
+
+        <a
+          href="community/index.html"
+          class="explore-card"
+        >
+
+          <div class="explore-index">08</div>
+
+          <div class="explore-card-content">
+
+            <h3>Community</h3>
+
+            <p>
+              Questions, answers
+              and discussions.
+            </p>
+
+          </div>
+
+          <span class="explore-arrow">→</span>
+
+        </a>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         OFFICIAL PATCH NOTES
+    ==================================================== -->
+
+    <section class="official-section">
+
+      <div class="official-mark">
+        VERIFIED SOURCE
+      </div>
+
+      <div class="official-copy">
+
+        <h2>
+          Official Patch Notes
+        </h2>
+
+        <p>
+          HoKStat will connect verified official
+          game data and patch information here.
+        </p>
+
+      </div>
+
+      <a
+        href="patches/index.html"
+        class="btn btn-secondary"
+      >
+        VIEW PATCHES
+      </a>
+
+    </section>
+
+  </main>
+
+
+  <!-- =====================================================
+       FOOTER
+  ====================================================== -->
+
+  <footer class="site-footer">
+
+    <div class="footer-inner">
+
+      <div>
+
+        <div class="footer-brand">
+          HoKStat<span>.gg</span>
+        </div>
+
+        <p class="footer-description">
+          Independent Honor of Kings database,
+          tools and community project.
+        </p>
+
+      </div>
+
+
+      <div class="footer-links">
+
+        <a href="about/index.html">
+          About
+        </a>
+
+        <a href="news/index.html">
+          News
+        </a>
+
+        <a href="patches/index.html">
+          Patches
+        </a>
+
+        <a href="community/index.html">
+          Community
+        </a>
+
+      </div>
+
     </div>
 
 
-    <!-- =========================================================
-         HEADER
-         ========================================================= -->
+    <div class="footer-bottom">
 
-    <header class="site-header">
+      <span>
+        © 2026 HoKStat.gg · Created & maintained by NoName
+      </span>
 
-        <a href="/" class="brand" aria-label="HoKStat.gg Home">
-            <span class="brand-main">HoKStat</span><span class="brand-dot">.gg</span>
-        </a>
+      <span>
+        Honor of Kings is a trademark of its respective owner.
+      </span>
 
-        <button
-            class="menu-toggle"
-            id="menuToggle"
-            aria-label="Open navigation"
-            aria-expanded="false"
-            type="button"
-        >
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
+    </div>
 
+  </footer>
 
-        <nav class="main-menu" id="mainMenu">
 
-            <div class="menu-group">
-
-                <span class="menu-label">EXPLORE</span>
-
-                <a href="/heroes">Heroes</a>
-                <a href="/equipment">Equipment</a>
-                <a href="/builds">Builds</a>
-                <a href="/calculator">Calculator</a>
-                <a href="/meta">Meta</a>
-                <a href="/patches">Patches</a>
-                <a href="/guides">Guides</a>
-                <a href="/community">Community</a>
-
-            </div>
-
-
-            <div class="menu-group">
-
-                <span class="menu-label">DISCOVER</span>
-
-                <a href="/news">News</a>
-                <a href="/shops">Official Token Shops</a>
-
-            </div>
-
-
-            <div class="menu-group">
-
-                <span class="menu-label">ACCOUNT</span>
-
-                <div id="guestMenu">
-                    <a href="/login">Login</a>
-                    <a href="/register">Register</a>
-                </div>
-
-                <div id="userMenu" hidden>
-                    <a href="/profile">Profile</a>
-                    <a href="/saved-builds">Saved Builds</a>
-                    <a href="/bookmarks">Bookmarks</a>
-                    <a href="/activity">Activity</a>
-                    <a href="/settings">Settings</a>
-                    <button type="button" id="logoutButton">Logout</button>
-                </div>
-
-                <div id="adminMenu" hidden>
-                    <a href="/admin">Admin Dashboard</a>
-                </div>
-
-            </div>
-
-        </nav>
-
-    </header>
-
-
-
-    <!-- =========================================================
-         MAIN
-         ========================================================= -->
-
-    <main class="homepage">
-
-
-        <!-- =====================================================
-             CINEMATIC HERO
-             ===================================================== -->
-
-        <section
-            class="cinematic-hero"
-            id="heroSlider"
-            aria-label="Featured HoKStat content"
-        >
-
-            <div class="hero-background"></div>
-
-            <div class="hero-overlay"></div>
-            <div class="hero-vignette"></div>
-
-
-            <!-- SLIDES ARE GENERATED BY JS -->
-
-            <div
-                class="slides-container"
-                id="slidesContainer"
-            ></div>
-
-
-            <!-- Slider arrows -->
-
-            <button
-                class="slider-arrow slider-prev"
-                id="sliderPrev"
-                type="button"
-                aria-label="Previous slide"
-            >
-                <span>‹</span>
-            </button>
-
-            <button
-                class="slider-arrow slider-next"
-                id="sliderNext"
-                type="button"
-                aria-label="Next slide"
-            >
-                <span>›</span>
-            </button>
-
-
-            <!-- Slider bottom -->
-
-            <div class="hero-bottom">
-
-                <div
-                    class="slider-dots"
-                    id="sliderDots"
-                    aria-label="Slide navigation"
-                ></div>
-
-                <div class="slide-counter" id="slideCounter">
-                    01 / 06
-                </div>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =====================================================
-             QUICK SEARCH
-             ===================================================== -->
-
-        <section class="quick-search-section">
-
-            <div class="quick-search-container">
-
-                <div class="search-heading">
-
-                    <span class="section-kicker">
-                        QUICK SEARCH
-                    </span>
-
-                    <h2>
-                        Find Anything in HoKStat
-                    </h2>
-
-                </div>
-
-
-                <form
-                    class="quick-search"
-                    id="quickSearchForm"
-                >
-
-                    <div class="search-icon" aria-hidden="true">
-                        ⌕
-                    </div>
-
-                    <label
-                        for="quickSearchInput"
-                        class="sr-only"
-                    >
-                        Search HoKStat
-                    </label>
-
-                    <input
-                        type="search"
-                        id="quickSearchInput"
-                        name="q"
-                        placeholder="Search heroes, equipment, builds, guides..."
-                        autocomplete="off"
-                    >
-
-                    <button
-                        type="submit"
-                        class="search-button"
-                    >
-                        SEARCH
-                    </button>
-
-                </form>
-
-
-                <div
-                    class="search-results"
-                    id="quickSearchResults"
-                    hidden
-                ></div>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =====================================================
-             EXPLORE
-             ===================================================== -->
-
-        <section class="explore-section page-section">
-
-            <div class="section-heading">
-
-                <div>
-                    <span class="section-kicker">
-                        EXPLORE
-                    </span>
-
-                    <h2>
-                        Explore HoKStat.gg
-                    </h2>
-
-                    <p>
-                        Heroes, equipment, builds, tools, updates and community resources.
-                    </p>
-                </div>
-
-            </div>
-
-
-            <div class="explore-grid">
-
-
-                <!-- HEROES -->
-
-                <a href="/heroes" class="explore-tile">
-
-                    <div
-                        class="tile-visual"
-                        data-visual="heroes"
-                    >
-                        <div class="visual-pattern"></div>
-                        <div class="visual-symbol">H</div>
-                    </div>
-
-                    <div class="tile-content">
-
-                        <span class="tile-number">
-                            01
-                        </span>
-
-                        <div>
-                            <h3>Heroes</h3>
-
-                            <p>
-                                Stats, skills, skins, counters and more.
-                            </p>
-                        </div>
-
-                        <span class="tile-arrow">
-                            →
-                        </span>
-
-                    </div>
-
-                </a>
-
-
-
-                <!-- EQUIPMENT -->
-
-                <a href="/equipment" class="explore-tile">
-
-                    <div
-                        class="tile-visual"
-                        data-visual="equipment"
-                    >
-                        <div class="visual-pattern"></div>
-                        <div class="visual-symbol">E</div>
-                    </div>
-
-                    <div class="tile-content">
-
-                        <span class="tile-number">
-                            02
-                        </span>
-
-                        <div>
-                            <h3>Equipment</h3>
-
-                            <p>
-                                Items, stats, passives and build paths.
-                            </p>
-                        </div>
-
-                        <span class="tile-arrow">
-                            →
-                        </span>
-
-                    </div>
-
-                </a>
-
-
-
-                <!-- BUILDS -->
-
-                <a href="/builds" class="explore-tile">
-
-                    <div
-                        class="tile-visual"
-                        data-visual="builds"
-                    >
-                        <div class="visual-pattern"></div>
-                        <div class="visual-symbol">B</div>
-                    </div>
-
-                    <div class="tile-content">
-
-                        <span class="tile-number">
-                            03
-                        </span>
-
-                        <div>
-                            <h3>Builds</h3>
-
-                            <p>
-                                Recommended and community builds.
-                            </p>
-                        </div>
-
-                        <span class="tile-arrow">
-                            →
-                        </span>
-
-                    </div>
-
-                </a>
-
-
-
-                <!-- CALCULATOR -->
-
-                <a href="/calculator" class="explore-tile">
-
-                    <div
-                        class="tile-visual"
-                        data-visual="calculator"
-                    >
-                        <div class="visual-pattern"></div>
-                        <div class="visual-symbol">+</div>
-                    </div>
-
-                    <div class="tile-content">
-
-                        <span class="tile-number">
-                            04
-                        </span>
-
-                        <div>
-                            <h3>Calculator</h3>
-
-                            <p>
-                                Create builds and calculate final stats.
-                            </p>
-                        </div>
-
-                        <span class="tile-arrow">
-                            →
-                        </span>
-
-                    </div>
-
-                </a>
-
-
-
-                <!-- META -->
-
-                <a href="/meta" class="explore-tile">
-
-                    <div
-                        class="tile-visual"
-                        data-visual="meta"
-                    >
-                        <div class="visual-pattern"></div>
-                        <div class="visual-symbol">M</div>
-                    </div>
-
-                    <div class="tile-content">
-
-                        <span class="tile-number">
-                            05
-                        </span>
-
-                        <div>
-                            <h3>Meta</h3>
-
-                            <p>
-                                Win rate, pick rate, trends and more.
-                            </p>
-                        </div>
-
-                        <span class="tile-arrow">
-                            →
-                        </span>
-
-                    </div>
-
-                </a>
-
-
-
-                <!-- PATCHES -->
-
-                <a href="/patches" class="explore-tile">
-
-                    <div
-                        class="tile-visual"
-                        data-visual="patches"
-                    >
-                        <div class="visual-pattern"></div>
-                        <div class="visual-symbol">P</div>
-                    </div>
-
-                    <div class="tile-content">
-
-                        <span class="tile-number">
-                            06
-                        </span>
-
-                        <div>
-                            <h3>Patches</h3>
-
-                            <p>
-                                Track changes across game versions.
-                            </p>
-                        </div>
-
-                        <span class="tile-arrow">
-                            →
-                        </span>
-
-                    </div>
-
-                </a>
-
-
-
-                <!-- GUIDES -->
-
-                <a href="/guides" class="explore-tile">
-
-                    <div
-                        class="tile-visual"
-                        data-visual="guides"
-                    >
-                        <div class="visual-pattern"></div>
-                        <div class="visual-symbol">G</div>
-                    </div>
-
-                    <div class="tile-content">
-
-                        <span class="tile-number">
-                            07
-                        </span>
-
-                        <div>
-                            <h3>Guides</h3>
-
-                            <p>
-                                Beginner, hero and advanced guides.
-                            </p>
-                        </div>
-
-                        <span class="tile-arrow">
-                            →
-                        </span>
-
-                    </div>
-
-                </a>
-
-
-
-                <!-- COMMUNITY -->
-
-                <a href="/community" class="explore-tile">
-
-                    <div
-                        class="tile-visual"
-                        data-visual="community"
-                    >
-                        <div class="visual-pattern"></div>
-                        <div class="visual-symbol">C</div>
-                    </div>
-
-                    <div class="tile-content">
-
-                        <span class="tile-number">
-                            08
-                        </span>
-
-                        <div>
-                            <h3>Community</h3>
-
-                            <p>
-                                Questions, answers and discussions.
-                            </p>
-                        </div>
-
-                        <span class="tile-arrow">
-                            →
-                        </span>
-
-                    </div>
-
-                </a>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =====================================================
-             OFFICIAL PATCH NOTES
-             ===================================================== -->
-
-        <section class="official-patch-section">
-
-            <div
-                class="official-patch-widget"
-                id="officialPatchWidget"
-            >
-
-                <div class="patch-widget-art">
-
-                    <div class="patch-art-pattern"></div>
-
-                    <img
-                        id="officialPatchImage"
-                        src=""
-                        alt=""
-                    >
-
-                    <span class="patch-art-label">
-                        OFFICIAL
-                    </span>
-
-                </div>
-
-
-                <div class="patch-widget-content">
-
-                    <div class="patch-widget-top">
-
-                        <span class="official-badge">
-                            OFFICIAL
-                        </span>
-
-                        <span class="patch-widget-label">
-                            PATCH NOTES
-                        </span>
-
-                    </div>
-
-
-                    <span
-                        class="patch-version"
-                        id="officialPatchVersion"
-                    >
-                        PATCH —
-                    </span>
-
-                    <h2 id="officialPatchTitle">
-                        Latest Official Update
-                    </h2>
-
-                    <p id="officialPatchSummary">
-                        Official patch information will appear here.
-                    </p>
-
-
-                    <div class="patch-widget-footer">
-
-                        <span id="officialPatchDate">
-                            —
-                        </span>
-
-                        <a
-                            href="#"
-                            id="officialPatchLink"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            READ MORE →
-                        </a>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =====================================================
-             FEATURED CONTENT
-             ===================================================== -->
-
-        <section class="featured-section page-section">
-
-            <div class="section-heading">
-
-                <div>
-
-                    <span class="section-kicker">
-                        DISCOVER
-                    </span>
-
-                    <h2>
-                        Featured Content
-                    </h2>
-
-                    <p>
-                        A rotating selection from the HoKStat database.
-                    </p>
-
-                </div>
-
-                <a
-                    href="/news"
-                    class="section-link"
-                >
-                    VIEW ALL →
-                </a>
-
-            </div>
-
-
-            <div class="featured-layout">
-
-
-                <!-- LARGE -->
-
-                <article class="featured-main">
-
-                    <div class="featured-image">
-
-                        <div class="image-placeholder">
-                            <span>HOKSTAT</span>
-                        </div>
-
-                        <img
-                            id="featuredMainImage"
-                            src=""
-                            alt=""
-                        >
-
-                    </div>
-
-
-                    <div class="featured-overlay">
-
-                        <span
-                            class="content-tag"
-                            id="featuredMainTag"
-                        >
-                            FEATURED
-                        </span>
-
-                        <h3 id="featuredMainTitle">
-                            Featured HoKStat Content
-                        </h3>
-
-                        <p id="featuredMainDescription">
-                            Discover something new from HoKStat.gg.
-                        </p>
-
-                        <a
-                            href="/news"
-                            id="featuredMainLink"
-                            class="text-link"
-                        >
-                            EXPLORE →
-                        </a>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- SIDE -->
-
-                <div class="featured-side">
-
-
-                    <article class="featured-small">
-
-                        <div class="small-image">
-
-                            <div class="image-placeholder">
-                                <span>HERO</span>
-                            </div>
-
-                            <img
-                                id="featuredSmallImage1"
-                                src=""
-                                alt=""
-                            >
-
-                        </div>
-
-                        <div class="small-content">
-
-                            <span class="content-tag">
-                                HERO
-                            </span>
-
-                            <h3 id="featuredSmallTitle1">
-                                Featured Hero
-                            </h3>
-
-                            <a
-                                href="/heroes"
-                                id="featuredSmallLink1"
-                            >
-                                VIEW HERO →
-                            </a>
-
-                        </div>
-
-                    </article>
-
-
-
-                    <article class="featured-small">
-
-                        <div class="small-image">
-
-                            <div class="image-placeholder">
-                                <span>BUILD</span>
-                            </div>
-
-                            <img
-                                id="featuredSmallImage2"
-                                src=""
-                                alt=""
-                            >
-
-                        </div>
-
-                        <div class="small-content">
-
-                            <span class="content-tag">
-                                BUILD
-                            </span>
-
-                            <h3 id="featuredSmallTitle2">
-                                Featured Build
-                            </h3>
-
-                            <a
-                                href="/builds"
-                                id="featuredSmallLink2"
-                            >
-                                VIEW BUILD →
-                            </a>
-
-                        </div>
-
-                    </article>
-
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =====================================================
-             OFFICIAL TOKEN SHOPS
-             ===================================================== -->
-
-        <section class="official-shops-section page-section">
-
-            <div class="section-heading">
-
-                <div>
-
-                    <span class="section-kicker">
-                        OFFICIAL
-                    </span>
-
-                    <h2>
-                        Honor of Kings Token Shops
-                    </h2>
-
-                    <p>
-                        Verified official external shops only.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div class="official-shops-grid">
-
-
-                <a
-                    href="#"
-                    class="official-shop"
-                    id="officialShopOne"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-
-                    <div class="shop-visual">
-
-                        <div class="shop-symbol">
-                            $
-                        </div>
-
-                        <img
-                            src=""
-                            alt=""
-                            data-asset="shop-one-logo"
-                        >
-
-                    </div>
-
-
-                    <div class="shop-info">
-
-                        <span class="official-badge">
-                            VERIFIED OFFICIAL
-                        </span>
-
-                        <h3>
-                            Official Token Shop
-                        </h3>
-
-                        <p>
-                            Official external website
-                        </p>
-
-                    </div>
-
-                    <span class="external-arrow">
-                        ↗
-                    </span>
-
-                </a>
-
-
-
-                <a
-                    href="#"
-                    class="official-shop"
-                    id="officialShopTwo"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-
-                    <div class="shop-visual">
-
-                        <div class="shop-symbol">
-                            $
-                        </div>
-
-                        <img
-                            src=""
-                            alt=""
-                            data-asset="shop-two-logo"
-                        >
-
-                    </div>
-
-
-                    <div class="shop-info">
-
-                        <span class="official-badge">
-                            VERIFIED OFFICIAL
-                        </span>
-
-                        <h3>
-                            Official Token Shop
-                        </h3>
-
-                        <p>
-                            Official external website
-                        </p>
-
-                    </div>
-
-                    <span class="external-arrow">
-                        ↗
-                    </span>
-
-                </a>
-
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =====================================================
-             AD
-             ===================================================== -->
-
-        <section
-            class="ad-section"
-            id="homepageAd"
-            aria-label="Advertisement"
-        >
-
-            <div class="ad-placeholder">
-
-                <span>
-                    ADVERTISEMENT
-                </span>
-
-            </div>
-
-        </section>
-
-
-    </main>
-
-
-
-    <!-- =========================================================
-         FOOTER
-         ========================================================= -->
-
-    <footer class="site-footer">
-
-        <div class="footer-main">
-
-
-            <div class="footer-brand">
-
-                <a href="/" class="brand">
-                    <span class="brand-main">HoKStat</span><span class="brand-dot">.gg</span>
-                </a>
-
-                <p>
-                    Honor of Kings database, tools and community resources.
-                </p>
-
-            </div>
-
-
-            <div class="footer-links">
-
-
-                <div>
-
-                    <h3>Explore</h3>
-
-                    <a href="/heroes">Heroes</a>
-                    <a href="/equipment">Equipment</a>
-                    <a href="/builds">Builds</a>
-                    <a href="/calculator">Calculator</a>
-
-                </div>
-
-
-                <div>
-
-                    <h3>Resources</h3>
-
-                    <a href="/meta">Meta</a>
-                    <a href="/patches">Patches</a>
-                    <a href="/guides">Guides</a>
-                    <a href="/community">Community</a>
-
-                </div>
-
-
-                <div>
-
-                    <h3>Project</h3>
-
-                    <a href="/about">About</a>
-                    <a href="/data">Data</a>
-                    <a href="/news">News</a>
-
-                </div>
-
-
-            </div>
-
-        </div>
-
-
-        <div class="footer-bottom">
-
-            <p>
-                © 2026 HoKStat.gg · Created & maintained by NoName
-            </p>
-
-            <p>
-                Honor of Kings and related assets are property of their respective owners.
-                HoKStat.gg is an independent fan project.
-            </p>
-
-        </div>
-
-    </footer>
-
-
-
-    <!-- Accessibility status -->
-
-    <div
-        class="sr-only"
-        aria-live="polite"
-        id="accessibilityStatus"
-    ></div>
-
-
-    <script src="script.js"></script>
+  <script src="js/app.js"></script>
 
 </body>
-                      </html>
+</html>
