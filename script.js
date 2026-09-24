@@ -1,2458 +1,7691 @@
 /* =========================================================
-   HoKStat.gg
-   Frontend prototype
-   LOCAL DEMO DATA ONLY
-   Official database/API will replace this layer later.
+   HoKStats.gg
+   Main Frontend Application
+   File: script.js
+
+   Purpose:
+   - SPA-style page navigation
+   - Homepage cinematic slider
+   - Global search
+   - Hero / Equipment / Build rendering
+   - Equipment calculator
+   - Meta / Patch / News / Guide / Community pages
+   - Local bookmarks
+   - Mobile navigation
+   - Modal / toast / tabs / filters
+   - URL state
+   - API-ready architecture
+
+   IMPORTANT:
+   This frontend intentionally contains no secret keys.
+   Real official data should be connected through the API layer.
    ========================================================= */
 
 "use strict";
 
 /* =========================================================
-   DEMO DATA
+   1. GLOBAL CONFIGURATION
    ========================================================= */
 
-const HEROES = [
-  {
-    id: "demo-hero-1",
-    slug: "dun",
-    name: "Dun",
-    role: "Clash Lane",
-    lane: "Clash",
-    difficulty: "Medium",
-    mark: "D",
-    bio: "LOCAL DEMO record. Replace this record with verified official live data through the HoKStat data API.",
-    status: "DATA PENDING"
-  },
-  {
-    id: "demo-hero-2",
-    slug: "demo-assassin",
-    name: "Demo Assassin",
-    role: "Jungle",
-    lane: "Jungle",
-    difficulty: "Hard",
-    mark: "A",
-    bio: "LOCAL DEMO record used only to demonstrate the visual hero database layout.",
-    status: "DATA PENDING"
-  },
-  {
-    id: "demo-hero-3",
-    slug: "demo-mage",
-    name: "Demo Mage",
-    role: "Mid Lane",
-    lane: "Mid",
-    difficulty: "Medium",
-    mark: "M",
-    bio: "LOCAL DEMO record used only to demonstrate the visual hero database layout.",
-    status: "DATA PENDING"
-  },
-  {
-    id: "demo-hero-4",
-    slug: "demo-tank",
-    name: "Demo Tank",
-    role: "Roamer",
-    lane: "Roam",
-    difficulty: "Easy",
-    mark: "T",
-    bio: "LOCAL DEMO record used only to demonstrate the visual hero database layout.",
-    status: "DATA PENDING"
-  }
-];
+const HOKSTATS_CONFIG = {
+    siteName: "HoKStats.gg",
+    version: "0.1.0",
+    defaultPage: "home",
 
-const ITEMS = [
-  {
-    id: "demo-item-1",
-    slug: "demo-blade",
-    name: "Demo Blade",
-    type: "Attack",
-    price: 1000,
-    mark: "ATK",
-    stats: ["Attack +80"],
-    passive: "LOCAL DEMO passive."
-  },
-  {
-    id: "demo-item-2",
-    slug: "demo-armor",
-    name: "Demo Armor",
-    type: "Defense",
-    price: 900,
-    mark: "DEF",
-    stats: ["Defense +100", "HP +500"],
-    passive: "LOCAL DEMO passive."
-  },
-  {
-    id: "demo-item-3",
-    slug: "demo-magic",
-    name: "Demo Tome",
-    type: "Magic",
-    price: 1200,
-    mark: "MAG",
-    stats: ["Magic Attack +90"],
-    passive: "LOCAL DEMO passive."
-  },
-  {
-    id: "demo-item-4",
-    slug: "demo-boots",
-    name: "Demo Boots",
-    type: "Movement",
-    price: 700,
-    mark: "SPD",
-    stats: ["Movement +60"],
-    passive: "LOCAL DEMO passive."
-  },
-  {
-    id: "demo-item-5",
-    slug: "demo-crit",
-    name: "Demo Edge",
-    type: "Attack",
-    price: 1400,
-    mark: "CRT",
-    stats: ["Attack +45", "Crit +15%"],
-    passive: "LOCAL DEMO passive."
-  },
-  {
-    id: "demo-item-6",
-    slug: "demo-resist",
-    name: "Demo Barrier",
-    type: "Defense",
-    price: 1300,
-    mark: "RES",
-    stats: ["Magic Defense +90"],
-    passive: "LOCAL DEMO passive."
-  }
-];
+    storageKeys: {
+        bookmarks: "hokstats_bookmarks_v1",
+        calculator: "hokstats_calculator_v1",
+        language: "hokstats_language_v1",
+        recentSearches: "hokstats_recent_searches_v1",
+        sliderIndex: "hokstats_slider_index_v1"
+    },
 
-const BUILDS = [
-  {
-    id: "demo-build-1",
-    slug: "demo-balanced-build",
-    name: "Balanced Demo Build",
-    hero: "Dun",
-    type: "Recommended",
-    description: "LOCAL DEMO build. Replace with verified build data.",
-    items: [
-      "demo-item-1",
-      "demo-item-2",
-      "demo-item-4",
-      "demo-item-5",
-      "demo-item-6",
-      "demo-item-3"
+    slider: {
+        interval: 6500,
+        transition: 500
+    },
+
+    search: {
+        maxSuggestions: 8,
+        minCharacters: 1
+    },
+
+    calculator: {
+        slots: 6
+    },
+
+    supportedLanguages: [
+        "en",
+        "vi",
+        "zh",
+        "fr",
+        "ms",
+        "id",
+        "fil",
+        "ja",
+        "es"
     ]
-  },
-  {
-    id: "demo-build-2",
-    slug: "demo-tank-build",
-    name: "Tank Demo Build",
-    hero: "Demo Tank",
-    type: "Recommended",
-    description: "LOCAL DEMO build for testing the build UI.",
-    items: [
-      "demo-item-2",
-      "demo-item-6",
-      "demo-item-4",
-      "demo-item-2",
-      "demo-item-6",
-      "demo-item-1"
-    ]
-  },
-  {
-    id: "demo-build-3",
-    slug: "demo-damage-build",
-    name: "Damage Demo Build",
-    hero: "Demo Assassin",
-    type: "Recommended",
-    description: "LOCAL DEMO build for testing the build UI.",
-    items: [
-      "demo-item-1",
-      "demo-item-5",
-      "demo-item-4",
-      "demo-item-1",
-      "demo-item-5",
-      "demo-item-3"
-    ]
-  }
-];
-
-const SLIDES = [
-  {
-    type: "HERO",
-    title: "Heroes",
-    highlight: "Database",
-    description:
-      "Explore hero profiles, skills, stats, builds, skins and patch history. Official data integration ready.",
-    action: "EXPLORE HEROES",
-    page: "heroes",
-    art: "hero"
-  },
-  {
-    type: "BUILD",
-    title: "Build",
-    highlight: "Engine",
-    description:
-      "Build around six equipment slots and inspect the resulting stat structure.",
-    action: "VIEW BUILDS",
-    page: "builds",
-    art: "build"
-  },
-  {
-    type: "EQUIPMENT",
-    title: "Equipment",
-    highlight: "Database",
-    description:
-      "Search equipment, inspect stats, passives, build paths and historical changes.",
-    action: "EXPLORE EQUIPMENT",
-    page: "equipment",
-    art: "equipment"
-  },
-  {
-    type: "PATCH",
-    title: "Patch",
-    highlight: "History",
-    description:
-      "Track verified changes while preserving historical snapshots instead of overwriting data.",
-    action: "VIEW PATCHES",
-    page: "patches",
-    art: "patch"
-  },
-  {
-    type: "GUIDE",
-    title: "Guides",
-    highlight: "Library",
-    description:
-      "Quick hero explanations stay concise. Deeper strategy belongs in the guide system.",
-    action: "READ GUIDES",
-    page: "guides",
-    art: "guide"
-  },
-  {
-    type: "NEWS",
-    title: "News",
-    highlight: "Updates",
-    description:
-      "Official announcements, coming-soon content and clearly separated unconfirmed information.",
-    action: "VIEW NEWS",
-    page: "news",
-    art: "news"
-  }
-];
-
-/* =========================================================
-   APP STATE
-   ========================================================= */
-
-const state = {
-  sliderIndex: 0,
-  sliderTimer: null,
-  sliderPaused: false,
-  calculatorItems: [null, null, null, null, null, null],
-  selectedHero: "Dun"
 };
 
-/* =========================================================
-   DOM HELPERS
-   ========================================================= */
-
-const app = document.getElementById("app");
-const toastElement = document.getElementById("toast");
-
-function esc(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function money(value) {
-  return Number(value || 0).toLocaleString("en-US");
-}
-
-function getParams() {
-  return new URLSearchParams(window.location.search);
-}
-
-function getPage() {
-  return getParams().get("page") || "home";
-}
-
-function go(page, extra = {}) {
-  const params = new URLSearchParams();
-  params.set("page", page);
-
-  Object.entries(extra).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== "") {
-      params.set(key, value);
-    }
-  });
-
-  window.location.href = `index.html?${params.toString()}`;
-}
-
-function showToast(message) {
-  if (!toastElement) return;
-
-  toastElement.textContent = message;
-  toastElement.classList.add("show");
-
-  window.clearTimeout(showToast.timer);
-
-  showToast.timer = window.setTimeout(() => {
-    toastElement.classList.remove("show");
-  }, 2400);
-}
-
-function heroBySlug(slug) {
-  return HEROES.find(hero => hero.slug === slug);
-}
-
-function itemBySlug(slug) {
-  return ITEMS.find(item => item.slug === slug);
-}
-
-function itemById(id) {
-  return ITEMS.find(item => item.id === id);
-}
-
-function buildBySlug(slug) {
-  return BUILDS.find(build => build.slug === slug);
-}
 
 /* =========================================================
-   GENERIC COMPONENTS
+   2. SAFE STORAGE HELPERS
    ========================================================= */
 
-function pageHeader(eyebrow, title, subtitle) {
-  return `
-    <header class="page-header">
-      <div class="eyebrow">${esc(eyebrow)}</div>
-      <h1 class="page-title">${esc(title)}</h1>
-      <p class="page-subtitle">${esc(subtitle)}</p>
-    </header>
-  `;
-}
-
-function pendingPanel(title = "Official data not connected") {
-  return `
-    <div class="empty-state">
-      <div class="empty-icon">✓</div>
-      <h3>${esc(title)}</h3>
-      <p>
-        This interface is ready for the official HoKStat data/API layer.
-        No unverified live values are being fabricated here.
-      </p>
-    </div>
-  `;
-}
-
-function itemIcon(item) {
-  if (!item) {
-    return `
-      <div class="item-icon">+</div>
-    `;
-  }
-
-  return `
-    <div class="item-icon">${esc(item.mark)}</div>
-  `;
-}
-
-/* =========================================================
-   HOME
-   ========================================================= */
-
-function renderHome() {
-  return `
-    <div class="page">
-
-      <section
-        class="home-hero"
-        id="homeHero"
-        aria-label="HoKStat featured content"
-      >
-
-        <div class="home-search">
-          <div class="search-box">
-            <input
-              id="homeSearch"
-              type="search"
-              autocomplete="off"
-              placeholder="Search heroes, equipment, builds..."
-              aria-label="Search HoKStat.gg"
-            >
-            <span class="search-icon">⌕</span>
-          </div>
-        </div>
-
-        ${SLIDES.map((slide, index) => `
-          <article
-            class="cinema-slide ${index === 0 ? "active" : ""}"
-            data-slide="${index}"
-          >
-
-            <div class="cinema-art" data-art="${esc(slide.art)}">
-              <div class="art-label">ARTWORK SLOT · ADMIN READY</div>
-            </div>
-
-            <div class="cinema-copy">
-              <div class="slide-type">
-                ${esc(slide.type)}
-              </div>
-
-              <h1 class="slide-title">
-                ${esc(slide.title)}
-                <span>${esc(slide.highlight)}</span>
-              </h1>
-
-              <p class="slide-description">
-                ${esc(slide.description)}
-              </p>
-
-              <div class="slide-actions">
-                <button
-                  class="btn btn-primary slide-action"
-                  type="button"
-                  data-page="${esc(slide.page)}"
-                >
-                  ${esc(slide.action)}
-                </button>
-
-                <button
-                  class="btn btn-ghost"
-                  type="button"
-                  id="pauseSlider"
-                >
-                  Pause
-                </button>
-              </div>
-            </div>
-
-          </article>
-        `).join("")}
-
-        <div class="cinema-controls">
-
-          <button
-            class="slide-arrow"
-            id="slidePrev"
-            type="button"
-            aria-label="Previous slide"
-          >
-            ←
-          </button>
-
-          <div class="slider-dots" aria-label="Slide selection">
-            ${SLIDES.map((_, index) => `
-              <button
-                class="slider-dot ${index === 0 ? "active" : ""}"
-                data-dot="${index}"
-                type="button"
-                aria-label="Go to slide ${index + 1}"
-              ></button>
-            `).join("")}
-          </div>
-
-          <button
-            class="slide-arrow"
-            id="slideNext"
-            type="button"
-            aria-label="Next slide"
-          >
-            →
-          </button>
-
-        </div>
-
-      </section>
-
-      <section class="section">
-        <div class="section-head">
-          <div>
-            <h2 class="section-title">Explore HoKStat</h2>
-            <p class="section-desc">
-              The main tools and databases in one place.
-            </p>
-          </div>
-        </div>
-
-        <div class="explore-grid">
-          ${exploreCard("H", "Heroes", "Hero database, skills and stats", "heroes")}
-          ${exploreCard("E", "Equipment", "Items, passives and build paths", "equipment")}
-          ${exploreCard("B", "Builds", "Recommended and community builds", "builds")}
-          ${exploreCard("C", "Calculator", "Six-slot equipment calculator", "calculator")}
-          ${exploreCard("M", "Meta", "Verified regional meta data", "meta")}
-          ${exploreCard("P", "Patches", "Patch notes and historical changes", "patches")}
-          ${exploreCard("G", "Guides", "Beginner to advanced guides", "guides")}
-          ${exploreCard("Q", "Community", "Questions, answers and discussion", "community")}
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="section-head">
-          <div>
-            <h2 class="section-title">Featured</h2>
-            <p class="section-desc">
-              Visual content slots ready for the homepage engine.
-            </p>
-          </div>
-          <a class="text-link" href="index.html?page=news">View news →</a>
-        </div>
-
-        <div class="card-grid">
-          ${featuredCard("NEW HERO", "Hero Spotlight", "Hero artwork and verified profile data will appear here.", "heroes")}
-          ${featuredCard("BUILD", "Build Spotlight", "Six equipment slots with calculated stats.", "builds")}
-          ${featuredCard("UPDATE", "Official Patch Notes", "Official source, version and verification status.", "patches")}
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="status-panel">
-          <div class="status-block">
-            <div class="status-label">Database</div>
-            <div class="status-value green">Architecture Ready</div>
-          </div>
-
-          <div class="status-block">
-            <div class="status-label">Live data</div>
-            <div class="status-value">Pending API connection</div>
-          </div>
-
-          <div class="status-block">
-            <div class="status-label">Verification</div>
-            <div class="status-value">Official-source workflow</div>
-          </div>
-        </div>
-      </section>
-
-    </div>
-  `;
-}
-
-function exploreCard(icon, title, description, page) {
-  return `
-    <a class="explore-card" href="index.html?page=${esc(page)}">
-      <div class="explore-icon">${esc(icon)}</div>
-      <h3>${esc(title)}</h3>
-      <p>${esc(description)}</p>
-    </a>
-  `;
-}
-
-function featuredCard(type, title, description, page) {
-  return `
-    <a href="index.html?page=${esc(page)}" class="card card-hover">
-      <div class="media-art" style="height:130px;">
-        <div class="art-label">${esc(type)} · ART SLOT</div>
-      </div>
-      <div style="padding:16px;">
-        <div class="eyebrow">${esc(type)}</div>
-        <h3 style="margin-bottom:6px;font-size:15px;">${esc(title)}</h3>
-        <p style="margin:0;color:var(--muted);font-size:11px;">
-          ${esc(description)}
-        </p>
-      </div>
-    </a>
-  `;
-}
-
-/* =========================================================
-   HEROES
-   ========================================================= */
-
-function renderHeroes() {
-  return `
-    <div class="page">
-      ${pageHeader(
-        "Database",
-        "Heroes",
-        "Browse hero profiles, roles, lanes and verified game data."
-      )}
-
-      <div class="filter-bar">
-        <input
-          class="input"
-          id="heroSearch"
-          type="search"
-          placeholder="Search heroes..."
-        >
-
-        <select class="select" id="heroRole">
-          <option value="">All roles</option>
-          <option value="Clash">Clash</option>
-          <option value="Jungle">Jungle</option>
-          <option value="Mid">Mid</option>
-          <option value="Roam">Roam</option>
-        </select>
-
-        <select class="select" id="heroDifficulty">
-          <option value="">All difficulty</option>
-          <option value="Easy">Easy</option>
-          <option value="Medium">Medium</option>
-          <option value="Hard">Hard</option>
-        </select>
-      </div>
-
-      <div class="hero-grid" id="heroGrid">
-        ${HEROES.map(renderHeroCard).join("")}
-      </div>
-    </div>
-  `;
-}
-
-function renderHeroCard(hero) {
-  return `
-    <a
-      class="hero-card"
-      href="index.html?page=hero&slug=${encodeURIComponent(hero.slug)}"
-    >
-
-      <div class="hero-card-art media-art">
-        <div class="hero-mark">${esc(hero.mark)}</div>
-        <div class="art-label">ADMIN ART SLOT</div>
-      </div>
-
-      <div class="hero-card-body">
-        <h3 class="hero-card-name">${esc(hero.name)}</h3>
-        <div class="hero-card-role">${esc(hero.role)}</div>
-
-        <div class="hero-tags">
-          <span class="tag">${esc(hero.lane)}</span>
-          <span class="tag">${esc(hero.difficulty)}</span>
-        </div>
-
-        <div class="data-pending">
-          <span>●</span>
-          ${esc(hero.status)}
-        </div>
-      </div>
-
-    </a>
-  `;
-}
-
-/* =========================================================
-   HERO DETAIL
-   ========================================================= */
-
-function renderHeroDetail() {
-  const slug = getParams().get("slug");
-  const hero = heroBySlug(slug);
-
-  if (!hero) {
-    return `
-      <div class="page">
-        ${pageHeader("Heroes", "Hero not found", "The requested hero record does not exist.")}
-        ${pendingPanel("Hero record unavailable")}
-      </div>
-    `;
-  }
-
-  return `
-    <div class="page">
-
-      <a
-        class="text-link"
-        href="index.html?page=heroes"
-        style="display:inline-block;margin-bottom:16px;"
-      >
-        ← Back to heroes
-      </a>
-
-      <section class="detail-hero">
-
-        <div class="cinema-art">
-          <div class="art-label">HERO ARTWORK · ADMIN READY</div>
-        </div>
-
-        <div class="detail-copy">
-          <div class="detail-role">${esc(hero.role)} · ${esc(hero.lane)}</div>
-          <h1 class="detail-name">${esc(hero.name)}</h1>
-
-          <div class="hero-tags">
-            <span class="tag tag-green">${esc(hero.difficulty)}</span>
-            <span class="tag">DATA PENDING</span>
-          </div>
-
-          <p class="detail-bio">${esc(hero.bio)}</p>
-        </div>
-
-      </section>
-
-      <section class="section">
-        <div class="section-head">
-          <div>
-            <h2 class="section-title">How to Play</h2>
-            <p class="section-desc">Short practical hero overview.</p>
-          </div>
-        </div>
-
-        <div class="panel">
-          <p class="muted small">
-            Official passive and skill information will appear here after
-            verified live data is connected. Deeper strategy belongs in Guides.
-          </p>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="section-head">
-          <div>
-            <h2 class="section-title">Skills</h2>
-            <p class="section-desc">Skill information is sourced from the verified hero dataset.</p>
-          </div>
-        </div>
-
-        <div class="skill-grid">
-          ${["Passive", "Skill 1", "Skill 2", "Ultimate"].map((name, i) => `
-            <div class="card skill-card">
-              <div class="skill-icon">${i === 0 ? "P" : i}</div>
-              <h3>${name}</h3>
-              <p>DATA PENDING — official skill description will be inserted here.</p>
-            </div>
-          `).join("")}
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="two-column">
-
-          <div class="panel">
-            <h2 class="panel-title">Base Stats</h2>
-
-            ${[
-              ["Health", 72, "DATA PENDING"],
-              ["Physical Attack", 61, "DATA PENDING"],
-              ["Physical Defense", 58, "DATA PENDING"],
-              ["Magic Defense", 54, "DATA PENDING"],
-              ["Attack Speed", 48, "DATA PENDING"],
-              ["Movement Speed", 63, "DATA PENDING"]
-            ].map(stat => `
-              <div class="stat-row">
-                <span class="stat-name">${stat[0]}</span>
-                <div class="stat-bar">
-                  <div class="stat-fill" style="--value:${stat[1]}%"></div>
-                </div>
-                <span class="stat-number">${stat[2]}</span>
-              </div>
-            `).join("")}
-
-            <div class="data-pending">
-              DEMO VISUAL ONLY — NOT OFFICIAL STAT VALUES
-            </div>
-          </div>
-
-          <div class="panel">
-            <h2 class="panel-title">Data Status</h2>
-
-            <div class="source-list">
-              <div class="source-row">
-                <span>Live data</span>
-                <span class="source-status">PENDING</span>
-              </div>
-
-              <div class="source-row">
-                <span>Official source</span>
-                <span class="source-status">READY</span>
-              </div>
-
-              <div class="source-row">
-                <span>Patch history</span>
-                <span class="source-status">READY</span>
-              </div>
-
-              <div class="source-row">
-                <span>Calculator</span>
-                <span class="source-status">READY</span>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="section-head">
-          <div>
-            <h2 class="section-title">Recommended Builds</h2>
-          </div>
-
-          <a class="text-link" href="index.html?page=builds">
-            View all →
-          </a>
-        </div>
-
-        <div class="build-grid">
-          ${BUILDS.filter(build => build.hero === hero.name).map(renderBuildCard).join("")}
-        </div>
-
-        ${BUILDS.filter(build => build.hero === hero.name).length === 0
-          ? pendingPanel("Build data pending")
-          : ""}
-      </section>
-
-      <section class="section">
-        <div class="two-column">
-
-          <div class="panel">
-            <h2 class="panel-title">Counters</h2>
-            ${pendingPanel("Verified counter data pending")}
-          </div>
-
-          <div class="panel">
-            <h2 class="panel-title">Synergies</h2>
-            ${pendingPanel("Verified synergy data pending")}
-          </div>
-
-        </div>
-      </section>
-
-    </div>
-  `;
-}
-
-/* =========================================================
-   EQUIPMENT
-   ========================================================= */
-
-function renderEquipment() {
-  return `
-    <div class="page">
-
-      ${pageHeader(
-        "Database",
-        "Equipment",
-        "Inspect equipment stats, passives and build paths."
-      )}
-
-      <div class="filter-bar">
-
-        <input
-          class="input"
-          id="itemSearch"
-          type="search"
-          placeholder="Search equipment..."
-        >
-
-        <select class="select" id="itemType">
-          <option value="">All types</option>
-          <option value="Attack">Attack</option>
-          <option value="Defense">Defense</option>
-          <option value="Magic">Magic</option>
-          <option value="Movement">Movement</option>
-        </select>
-
-      </div>
-
-      <div class="item-grid" id="itemGrid">
-        ${ITEMS.map(renderItemCard).join("")}
-      </div>
-
-    </div>
-  `;
-}
-
-function renderItemCard(item) {
-  return `
-    <a
-      class="item-card"
-      href="index.html?page=item&slug=${encodeURIComponent(item.slug)}"
-    >
-
-      <div class="item-top">
-        ${itemIcon(item)}
-
-        <div style="min-width:0;">
-          <h3 class="item-name">${esc(item.name)}</h3>
-          <div class="item-type">${esc(item.type)}</div>
-        </div>
-
-        <div class="item-price">${money(item.price)}</div>
-      </div>
-
-      <div class="item-stats">
-        ${item.stats.map(stat => `
-          <span class="stat-chip">${esc(stat)}</span>
-        `).join("")}
-      </div>
-
-      <div class="item-passive">
-        ${esc(item.passive)}
-      </div>
-
-    </a>
-  `;
-}
-
-/* =========================================================
-   ITEM DETAIL
-   ========================================================= */
-
-function renderItemDetail() {
-  const slug = getParams().get("slug");
-  const item = itemBySlug(slug);
-
-  if (!item) {
-    return `
-      <div class="page">
-        ${pageHeader("Equipment", "Equipment not found", "The requested equipment record does not exist.")}
-        ${pendingPanel()}
-      </div>
-    `;
-  }
-
-  return `
-    <div class="page">
-
-      <a
-        class="text-link"
-        href="index.html?page=equipment"
-        style="display:inline-block;margin-bottom:16px;"
-      >
-        ← Back to equipment
-      </a>
-
-      <section class="detail-hero">
-
-        <div class="detail-copy">
-          <div class="detail-role">${esc(item.type)}</div>
-
-          <div style="display:flex;align-items:center;gap:16px;margin:12px 0 8px;">
-            ${itemIcon(item)}
-            <h1 class="detail-name" style="margin:0;">
-              ${esc(item.name)}
-            </h1>
-          </div>
-
-          <div class="hero-tags">
-            <span class="tag tag-green">${money(item.price)} Gold</span>
-            <span class="tag">DATA PENDING</span>
-          </div>
-
-          <p class="detail-bio">
-            ${esc(item.passive)}
-          </p>
-        </div>
-
-      </section>
-
-      <section class="section">
-        <div class="two-column">
-
-          <div class="panel">
-            <h2 class="panel-title">Stats</h2>
-
-            <div class="item-stats">
-              ${item.stats.map(stat => `
-                <span class="stat-chip">${esc(stat)}</span>
-              `).join("")}
-            </div>
-          </div>
-
-          <div class="panel">
-            <h2 class="panel-title">Build Path</h2>
-            ${pendingPanel("Verified component data pending")}
-          </div>
-
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="panel">
-          <h2 class="panel-title">Passive</h2>
-          <p class="muted small">
-            ${esc(item.passive)}
-          </p>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="panel">
-          <h2 class="panel-title">Patch History</h2>
-          ${pendingPanel("Official patch history pending")}
-        </div>
-      </section>
-
-    </div>
-  `;
-}
-
-/* =========================================================
-   BUILDS
-   ========================================================= */
-
-function renderBuilds() {
-  return `
-    <div class="page">
-
-      ${pageHeader(
-        "Build Engine",
-        "Builds",
-        "Recommended builds and future community builds, connected to the calculator."
-      )}
-
-      <div class="filter-bar">
-        <input
-          class="input"
-          id="buildSearch"
-          type="search"
-          placeholder="Search builds..."
-        >
-
-        <select class="select" id="buildType">
-          <option value="">All builds</option>
-          <option value="Recommended">Recommended</option>
-          <option value="Community">Community</option>
-        </select>
-      </div>
-
-      <div class="build-grid" id="buildGrid">
-        ${BUILDS.map(renderBuildCard).join("")}
-      </div>
-
-    </div>
-  `;
-}
-
-function renderBuildCard(build) {
-  return `
-    <a
-      class="card card-hover build-card"
-      href="index.html?page=build&slug=${encodeURIComponent(build.slug)}"
-    >
-
-      <div class="build-head">
-        <div>
-          <h3 class="build-name">${esc(build.name)}</h3>
-          <div class="build-hero">${esc(build.hero)}</div>
-        </div>
-
-        <span class="tag tag-green">${esc(build.type)}</span>
-      </div>
-
-      <div class="build-slots">
-        ${build.items.map(id => {
-          const item = itemById(id);
-          return item
-            ? `<div class="build-slot" title="${esc(item.name)}">${esc(item.mark)}</div>`
-            : `<div class="build-slot">—</div>`;
-        }).join("")}
-      </div>
-
-      <p class="build-description">
-        ${esc(build.description)}
-      </p>
-
-      <div class="build-stats">
-        <div class="build-stat">
-          <strong>—</strong>
-          <span>Attack</span>
-        </div>
-        <div class="build-stat">
-          <strong>—</strong>
-          <span>Defense</span>
-        </div>
-        <div class="build-stat">
-          <strong>—</strong>
-          <span>Speed</span>
-        </div>
-      </div>
-
-      <div class="data-pending">
-        LOCAL DEMO BUILD
-      </div>
-
-    </a>
-  `;
-}
-
-/* =========================================================
-   BUILD DETAIL
-   ========================================================= */
-
-function renderBuildDetail() {
-  const slug = getParams().get("slug");
-  const build = buildBySlug(slug);
-
-  if (!build) {
-    return `
-      <div class="page">
-        ${pageHeader("Builds", "Build not found", "The requested build does not exist.")}
-        ${pendingPanel()}
-      </div>
-    `;
-  }
-
-  return `
-    <div class="page">
-
-      <a
-        class="text-link"
-        href="index.html?page=builds"
-        style="display:inline-block;margin-bottom:16px;"
-      >
-        ← Back to builds
-      </a>
-
-      <section class="detail-hero">
-        <div class="detail-copy">
-          <div class="detail-role">${esc(build.type)} · LOCAL DEMO</div>
-          <h1 class="detail-name">${esc(build.name)}</h1>
-
-          <div class="hero-tags">
-            <span class="tag tag-green">${esc(build.hero)}</span>
-            <span class="tag">6 ITEMS</span>
-          </div>
-
-          <p class="detail-bio">
-            ${esc(build.description)}
-          </p>
-
-          <div style="margin-top:20px;">
-            <button
-              class="btn btn-primary"
-              type="button"
-              id="tryBuild"
-            >
-              TRY THIS BUILD
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="panel">
-
-          <div class="section-head" style="margin-bottom:12px;">
-            <div>
-              <h2 class="section-title">Equipment</h2>
-              <p class="section-desc">Six equipment slots.</p>
-            </div>
-          </div>
-
-          <div class="build-slots">
-            ${build.items.map(id => {
-              const item = itemById(id);
-
-              return item
-                ? `
-                  <a
-                    class="build-slot"
-                    href="index.html?page=item&slug=${encodeURIComponent(item.slug)}"
-                    title="${esc(item.name)}"
-                  >
-                    ${esc(item.mark)}
-                  </a>
-                `
-                : `<div class="build-slot">—</div>`;
-            }).join("")}
-          </div>
-
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="two-column">
-
-          <div class="panel">
-            <h2 class="panel-title">Build Stats</h2>
-            ${pendingPanel("Verified calculation data pending")}
-          </div>
-
-          <div class="panel">
-            <h2 class="panel-title">Passive Effects</h2>
-            ${pendingPanel("Passive calculation pending")}
-          </div>
-
-        </div>
-      </section>
-
-    </div>
-  `;
-}
-
-/* =========================================================
-   CALCULATOR
-   ========================================================= */
-
-function renderCalculator() {
-  return `
-    <div class="page">
-
-      ${pageHeader(
-        "Tool",
-        "Equipment Calculator",
-        "Build six equipment slots and calculate the resulting stats."
-      )}
-
-      <div class="calculator-layout">
-
-        <div class="panel">
-
-          <div class="status-label">Hero</div>
-
-          <select class="select" id="calcHero" style="width:100%;">
-            ${HEROES.map(hero => `
-              <option value="${esc(hero.name)}">
-                ${esc(hero.name)}
-              </option>
-            `).join("")}
-          </select>
-
-          <div class="section-head" style="margin-top:25px;margin-bottom:0;">
-            <div>
-              <h2 class="panel-title" style="margin:0;">
-                Equipment
-              </h2>
-              <p class="section-desc">
-                Click a slot to cycle demo equipment.
-              </p>
-            </div>
-          </div>
-
-          <div class="slot-picker" id="calcSlots">
-            ${renderCalcSlots()}
-          </div>
-
-          <div style="display:flex;gap:8px;margin-top:16px;">
-            <button class="btn" id="resetCalc" type="button">
-              Reset
-            </button>
-
-            <button class="btn btn-primary" id="saveCalc" type="button">
-              Save Build
-            </button>
-
-            <button class="btn" id="shareCalc" type="button">
-              Share
-            </button>
-          </div>
-
-        </div>
-
-        <div class="panel">
-
-          <div class="eyebrow">Calculator Result</div>
-
-          <h2 class="section-title" style="margin-bottom:6px;">
-            Final Stats
-          </h2>
-
-          <p class="section-desc" style="margin-bottom:18px;">
-            LOCAL DEMO CALCULATION — not official live data.
-          </p>
-
-          <div class="calc-results" id="calcResults">
-            ${renderCalcResults()}
-          </div>
-
-          <div style="margin-top:20px;">
-            <h3 class="panel-title">Calculation Breakdown</h3>
-
-            <div class="source-list">
-              <div class="source-row">
-                <span>Base stats</span>
-                <span class="source-status">READY</span>
-              </div>
-
-              <div class="source-row">
-                <span>Equipment stats</span>
-                <span class="source-status">DEMO</span>
-              </div>
-
-              <div class="source-row">
-                <span>Hero effects</span>
-                <span class="source-status">PENDING</span>
-              </div>
-
-              <div class="source-row">
-                <span>Item passives</span>
-                <span class="source-status">PENDING</span>
-              </div>
-
-              <div class="source-row">
-                <span>Percentage modifiers</span>
-                <span class="source-status">PENDING</span>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-  `;
-}
-
-function renderCalcSlots() {
-  return state.calculatorItems.map((itemId, index) => {
-    const item = itemById(itemId);
-
-    return `
-      <button
-        class="calc-slot ${item ? "filled" : ""}"
-        data-calc-slot="${index}"
-        type="button"
-        aria-label="Equipment slot ${index + 1}"
-      >
-        ${itemIcon(item)}
-        <span>${item ? esc(item.name) : `Slot ${index + 1}`}</span>
-      </button>
-    `;
-  }).join("");
-}
-
-function calculateDemoStats() {
-  let attack = 100;
-  let defense = 50;
-  let magic = 50;
-  let hp = 1000;
-  let speed = 0;
-
-  state.calculatorItems.forEach(id => {
-    const item = itemById(id);
-
-    if (!item) return;
-
-    item.stats.forEach(stat => {
-      const text = stat.toLowerCase();
-
-      if (text.includes("attack +")) {
-        const value = parseInt(text.split("+")[1], 10);
-        if (!Number.isNaN(value)) attack += value;
-      }
-
-      if (text.includes("defense +")) {
-        const value = parseInt(text.split("+")[1], 10);
-        if (!Number.isNaN(value)) defense += value;
-      }
-
-      if (text.includes("magic defense +")) {
-        const value = parseInt(text.split("+")[1], 10);
-        if (!Number.isNaN(value)) magic += value;
-      }
-
-      if (text.includes("hp +")) {
-        const value = parseInt(text.split("+")[1], 10);
-        if (!Number.isNaN(value)) hp += value;
-      }
-
-      if (text.includes("movement +")) {
-        const value = parseInt(text.split("+")[1], 10);
-        if (!Number.isNaN(value)) speed += value;
-      }
-    });
-  });
-
-  return {
-    hp,
-    attack,
-    defense,
-    magic,
-    speed,
-    crit: state.calculatorItems.includes("demo-item-5") ? 15 : 0
-  };
-}
-
-function renderCalcResults() {
-  const stats = calculateDemoStats();
-
-  return `
-    ${calcStat("HP", stats.hp)}
-    ${calcStat("Physical Attack", stats.attack)}
-    ${calcStat("Physical Defense", stats.defense)}
-    ${calcStat("Magic Defense", stats.magic)}
-    ${calcStat("Movement", stats.speed)}
-    ${calcStat("Crit Rate", `${stats.crit}%`)}
-  `;
-}
-
-function calcStat(name, value) {
-  return `
-    <div class="calc-stat">
-      <span>${esc(name)}</span>
-      <strong>${esc(value)}</strong>
-    </div>
-  `;
-}
-
-function updateCalculatorUI() {
-  const slots = document.getElementById("calcSlots");
-  const results = document.getElementById("calcResults");
-
-  if (slots) {
-    slots.innerHTML = renderCalcSlots();
-  }
-
-  if (results) {
-    results.innerHTML = renderCalcResults();
-  }
-
-  bindCalculatorSlots();
-}
-
-function bindCalculatorSlots() {
-  document.querySelectorAll("[data-calc-slot]").forEach(button => {
-    button.addEventListener("click", () => {
-      const index = Number(button.dataset.calcSlot);
-
-      const current = state.calculatorItems[index];
-      const currentIndex = current
-        ? ITEMS.findIndex(item => item.id === current)
-        : -1;
-
-      const nextIndex = currentIndex + 1;
-
-      state.calculatorItems[index] =
-        nextIndex >= ITEMS.length
-          ? null
-          : ITEMS[nextIndex].id;
-
-      updateCalculatorUI();
-    });
-  });
-}
-
-/* =========================================================
-   META
-   ========================================================= */
-
-function renderMeta() {
-  return `
-    <div class="page">
-
-      ${pageHeader(
-        "Meta",
-        "Meta",
-        "Regional meta statistics are displayed only when verified data is available."
-      )}
-
-      <div class="filter-bar">
-        <select class="select">
-          <option>International</option>
-        </select>
-
-        <select class="select">
-          <option>All roles</option>
-          <option>Clash Lane</option>
-          <option>Jungle</option>
-          <option>Mid Lane</option>
-          <option>Farm Lane</option>
-          <option>Roamer</option>
-        </select>
-      </div>
-
-      ${pendingPanel("Verified meta data unavailable")}
-
-    </div>
-  `;
-}
-
-/* =========================================================
-   PATCHES
-   ========================================================= */
-
-function renderPatches() {
-  return `
-    <div class="page">
-
-      ${pageHeader(
-        "History",
-        "Patches",
-        "Track verified game changes while preserving historical data."
-      )}
-
-      <div class="timeline">
-
-        <div class="timeline-item">
-          <div class="timeline-version">CURRENT PATCH</div>
-          <h3 class="timeline-title">Official patch data pending</h3>
-          <p class="timeline-text">
-            No current patch number is fabricated in the frontend.
-            The official source will populate this automatically.
-          </p>
-        </div>
-
-        <div class="timeline-item">
-          <div class="timeline-version">HISTORY</div>
-          <h3 class="timeline-title">Historical snapshots ready</h3>
-          <p class="timeline-text">
-            Hero and equipment changes will retain old and new values.
-          </p>
-        </div>
-
-        <div class="timeline-item">
-          <div class="timeline-version">SYSTEM</div>
-          <h3 class="timeline-title">Change verification pipeline</h3>
-          <p class="timeline-text">
-            Official source → detection → validation → database → change log.
-          </p>
-        </div>
-
-      </div>
-
-    </div>
-  `;
-}
-
-/* =========================================================
-   NEWS
-   ========================================================= */
-
-function renderNews() {
-  const news = [
-    {
-      type: "OFFICIAL",
-      title: "Official news feed ready",
-      text: "Verified announcements will appear here.",
-      art: "OFFICIAL"
-    },
-    {
-      type: "COMING SOON",
-      title: "Coming-soon content",
-      text: "Only officially announced future content belongs here.",
-      art: "FUTURE"
-    },
-    {
-      type: "UNCONFIRMED",
-      title: "Leaks & rumors stay separated",
-      text: "Unconfirmed information will never enter the live database.",
-      art: "UNCONFIRMED"
-    }
-  ];
-
-  return `
-    <div class="page">
-
-      ${pageHeader(
-        "Updates",
-        "News",
-        "Official news, coming-soon announcements and clearly marked unconfirmed information."
-      )}
-
-      <div class="news-grid">
-
-        ${news.map(article => `
-          <article class="card card-hover news-card">
-
-            <div class="news-art media-art">
-              <div class="art-label">${esc(article.art)} · ART SLOT</div>
-            </div>
-
-            <div class="news-body">
-
-              <div class="news-meta">
-                <span class="tag ${article.type === "OFFICIAL" ? "tag-green" : ""}">
-                  ${esc(article.type)}
-                </span>
-
-                <span class="muted tiny">
-                  DATA PENDING
-                </span>
-              </div>
-
-              <h3 class="news-title">
-                ${esc(article.title)}
-              </h3>
-
-              <p class="news-summary">
-                ${esc(article.text)}
-              </p>
-
-            </div>
-
-          </article>
-        `).join("")}
-
-      </div>
-
-    </div>
-  `;
-}
-
-/* =========================================================
-   GUIDES
-   ========================================================= */
-
-function renderGuides() {
-  return `
-    <div class="page">
-
-      ${pageHeader(
-        "Library",
-        "Guides",
-        "From beginner explanations to deeper gameplay strategy."
-      )}
-
-      <div class="card-grid">
-
-        ${guideCard("Hero Guides", "Quick hero identity, skills and practical usage.", "heroes")}
-        ${guideCard("Beginner Guides", "Core systems and fundamentals.", "guides")}
-        ${guideCard("Equipment Guides", "Understand item stats and passives.", "equipment")}
-        ${guideCard("Gameplay", "Laning, rotations and teamfights.", "guides")}
-        ${guideCard("Advanced", "Deeper strategic concepts.", "guides")}
-        ${guideCard("Build Guides", "Strategy around specific equipment setups.", "builds")}
-
-      </div>
-
-    </div>
-  `;
-}
-
-function guideCard(title, text, page) {
-  return `
-    <a class="card card-hover" href="index.html?page=${esc(page)}">
-
-      <div class="media-art" style="height:140px;">
-        <div class="art-label">GUIDE ART · ADMIN READY</div>
-      </div>
-
-      <div style="padding:17px;">
-        <h3 style="font-size:15px;margin-bottom:6px;">
-          ${esc(title)}
-        </h3>
-
-        <p style="font-size:11px;color:var(--muted);margin:0;">
-          ${esc(text)}
-        </p>
-
-        <div class="data-pending">
-          CONTENT SYSTEM READY
-        </div>
-      </div>
-
-    </a>
-  `;
-}
-
-/* =========================================================
-   COMMUNITY
-   ========================================================= */
-
-function renderCommunity() {
-  return `
-    <div class="page">
-
-      ${pageHeader(
-        "Community",
-        "Q&A",
-        "Questions, answers, discussion and moderation."
-      )}
-
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px;">
-        <div class="muted small">
-          Community data is persistent and is never removed by raw-snapshot cleanup.
-        </div>
-
-        <button class="btn btn-primary" id="askQuestion" type="button">
-          Ask Question
-        </button>
-      </div>
-
-      <div class="question-list">
-
-        ${questionCard(
-          "What is the best way to learn a new hero?",
-          "Community question placeholder. Real user-generated content will come from the database.",
-          12,
-          4
-        )}
-
-        ${questionCard(
-          "How does the equipment calculator handle passives?",
-          "Calculator mechanics will be explained using verified game data.",
-          8,
-          3
-        )}
-
-        ${questionCard(
-          "Where can I find official patch information?",
-          "HoKStat will link patch entries back to their official source.",
-          6,
-          2
-        )}
-
-      </div>
-
-    </div>
-  `;
-}
-
-function questionCard(title, body, votes, answers) {
-  return `
-    <article class="question card-hover">
-
-      <div class="question-top">
-
-        <div>
-          <h3 class="question-title">${esc(title)}</h3>
-          <p class="question-body">${esc(body)}</p>
-        </div>
-
-        <span class="tag">Q&amp;A</span>
-
-      </div>
-
-      <div class="question-stats">
-        <span>▲ ${votes} votes</span>
-        <span>${answers} answers</span>
-        <span>Community</span>
-      </div>
-
-    </article>
-  `;
-}
-
-/* =========================================================
-   SEARCH
-   ========================================================= */
-
-function renderSearch() {
-  return `
-    <div class="page">
-
-      ${pageHeader(
-        "Global Search",
-        "Search HoKStat",
-        "Search across heroes, equipment, builds, guides, patches, news and community."
-      )}
-
-      <div class="search-page-box">
-        <input
-          id="globalSearch"
-          type="search"
-          autofocus
-          placeholder="Try: Dun, equipment, build..."
-        >
-      </div>
-
-      <div id="searchResults" class="search-results">
-        ${renderSearchResults("")}
-      </div>
-
-    </div>
-  `;
-}
-
-function renderSearchResults(query) {
-  const q = query.trim().toLowerCase();
-
-  const results = [];
-
-  HEROES.forEach(hero => {
-    if (!q || hero.name.toLowerCase().includes(q)) {
-      results.push({
-        type: "Hero",
-        name: hero.name,
-        url: `index.html?page=hero&slug=${encodeURIComponent(hero.slug)}`
-      });
-    }
-  });
-
-  ITEMS.forEach(item => {
-    if (!q || item.name.toLowerCase().includes(q)) {
-      results.push({
-        type: "Equipment",
-        name: item.name,
-        url: `index.html?page=item&slug=${encodeURIComponent(item.slug)}`
-      });
-    }
-  });
-
-  BUILDS.forEach(build => {
-    if (!q || build.name.toLowerCase().includes(q)) {
-      results.push({
-        type: "Build",
-        name: build.name,
-        url: `index.html?page=build&slug=${encodeURIComponent(build.slug)}`
-      });
-    }
-  });
-
-  if (results.length === 0) {
-    return pendingPanel("No matching results");
-  }
-
-  return results.map(result => `
-    <a class="search-result" href="${result.url}">
-      <div>
-        <div class="result-type">${esc(result.type)}</div>
-        <div class="result-name">${esc(result.name)}</div>
-      </div>
-      <span class="text-link">Open →</span>
-    </a>
-  `).join("");
-}
-
-/* =========================================================
-   ABOUT
-   ========================================================= */
-
-function renderAbout() {
-  return `
-    <div class="page">
-
-      ${pageHeader(
-        "Project",
-        "About HoKStat.gg",
-        "An independent Honor of Kings database and tools project."
-      )}
-
-      <div class="info-grid">
-
-        <div class="card info-card">
-          <h3>What is HoKStat.gg?</h3>
-          <p>
-            A living database and utility hub for heroes, equipment,
-            builds, calculators, patches, guides, news and community.
-          </p>
-        </div>
-
-        <div class="card info-card">
-          <h3>Official data first</h3>
-          <p>
-            Live data should come from official sources wherever possible.
-            Unverified values are not presented as facts.
-          </p>
-        </div>
-
-        <div class="card info-card">
-          <h3>Independent project</h3>
-          <p>
-            HoKStat.gg is independent and is not presented as an official
-            Honor of Kings website.
-          </p>
-        </div>
-
-      </div>
-
-      <section class="section">
-        <div class="panel">
-
-          <h2 class="panel-title">Data Methodology</h2>
-
-          <div class="timeline">
-
-            <div class="timeline-item">
-              <div class="timeline-version">01</div>
-              <h3 class="timeline-title">Official source</h3>
-              <p class="timeline-text">
-                Collect official live information.
-              </p>
-            </div>
-
-            <div class="timeline-item">
-              <div class="timeline-version">02</div>
-              <h3 class="timeline-title">Validation</h3>
-              <p class="timeline-text">
-                Check structure, values, references and consistency.
-              </p>
-            </div>
-
-            <div class="timeline-item">
-              <div class="timeline-version">03</div>
-              <h3 class="timeline-title">Database</h3>
-              <p class="timeline-text">
-                Update verified live data and preserve required history.
-              </p>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
-    </div>
-  `;
-}
-
-/* =========================================================
-   DATA PAGE
-   ========================================================= */
-
-function renderData() {
-  return `
-    <div class="page">
-
-      ${pageHeader(
-        "Transparency",
-        "Data",
-        "Information about source status, versions and verification."
-      )}
-
-      <div class="status-panel">
-
-        <div class="status-block">
-          <div class="status-label">Live Data</div>
-          <div class="status-value">Not connected</div>
-        </div>
-
-        <div class="status-block">
-          <div class="status-label">Data Version</div>
-          <div class="status-value">Pending</div>
-        </div>
-
-        <div class="status-block">
-          <div class="status-label">Last Updated</div>
-          <div class="status-value">Pending</div>
-        </div>
-
-      </div>
-
-      <section class="section">
-
-        <div class="panel">
-
-          <h2 class="panel-title">Source Pipeline</h2>
-
-          <div class="source-list">
-
-            <div class="source-row">
-              <span>Official Live Data</span>
-              <span class="source-status">PRIMARY</span>
-            </div>
-
-            <div class="source-row">
-              <span>Official Announcements</span>
-              <span class="source-status">PRIMARY</span>
-            </div>
-
-            <div class="source-row">
-              <span>Verified Historical Data</span>
-              <span class="source-status">SECONDARY</span>
-            </div>
-
-            <div class="source-row">
-              <span>Leaks / Rumors</span>
-              <span class="source-status">NEVER LIVE DATA</span>
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-      <section class="section">
-        ${pendingPanel("Automated verification service pending")}
-      </section>
-
-    </div>
-  `;
-}
-
-/* =========================================================
-   ROUTER
-   ========================================================= */
-
-function renderPage() {
-  const page = getPage();
-
-  switch (page) {
-    case "home":
-      app.innerHTML = renderHome();
-      bindHome();
-      break;
-
-    case "heroes":
-      app.innerHTML = renderHeroes();
-      bindHeroFilters();
-      break;
-
-    case "hero":
-      app.innerHTML = renderHeroDetail();
-      bindHeroDetail();
-      break;
-
-    case "equipment":
-      app.innerHTML = renderEquipment();
-      bindItemFilters();
-      break;
-
-    case "item":
-      app.innerHTML = renderItemDetail();
-      break;
-
-    case "builds":
-      app.innerHTML = renderBuilds();
-      bindBuildFilters();
-      break;
-
-    case "build":
-      app.innerHTML = renderBuildDetail();
-      bindBuildDetail();
-      break;
-
-    case "calculator":
-      app.innerHTML = renderCalculator();
-      bindCalculator();
-      break;
-
-    case "meta":
-      app.innerHTML = renderMeta();
-      break;
-
-    case "patches":
-      app.innerHTML = renderPatches();
-      break;
-
-    case "news":
-      app.innerHTML = renderNews();
-      break;
-
-    case "guides":
-      app.innerHTML = renderGuides();
-      break;
-
-    case "community":
-      app.innerHTML = renderCommunity();
-      bindCommunity();
-      break;
-
-    case "search":
-      app.innerHTML = renderSearch();
-      bindSearch();
-      break;
-
-    case "about":
-      app.innerHTML = renderAbout();
-      break;
-
-    case "data":
-      app.innerHTML = renderData();
-      break;
-
-    default:
-      app.innerHTML = renderHome();
-      bindHome();
-      break;
-  }
-}
-
-/* =========================================================
-   HOME EVENTS
-   ========================================================= */
-
-function bindHome() {
-  const hero = document.getElementById("homeHero");
-
-  if (!hero) return;
-
-  const slides = [...hero.querySelectorAll(".cinema-slide")];
-  const dots = [...hero.querySelectorAll(".slider-dot")];
-
-  function showSlide(index) {
-    state.sliderIndex = (index + slides.length) % slides.length;
-
-    slides.forEach((slide, i) => {
-      slide.classList.toggle("active", i === state.sliderIndex);
-    });
-
-    dots.forEach((dot, i) => {
-      dot.classList.toggle("active", i === state.sliderIndex);
-    });
-  }
-
-  function nextSlide() {
-    if (!state.sliderPaused) {
-      showSlide(state.sliderIndex + 1);
-    }
-  }
-
-  function startSlider() {
-    window.clearInterval(state.sliderTimer);
-
-    state.sliderTimer = window.setInterval(() => {
-      nextSlide();
-    }, 6000);
-  }
-
-  document.getElementById("slideNext")?.addEventListener("click", () => {
-    showSlide(state.sliderIndex + 1);
-    startSlider();
-  });
-
-  document.getElementById("slidePrev")?.addEventListener("click", () => {
-    showSlide(state.sliderIndex - 1);
-    startSlider();
-  });
-
-  dots.forEach(dot => {
-    dot.addEventListener("click", () => {
-      showSlide(Number(dot.dataset.dot));
-      startSlider();
-    });
-  });
-
-  document.querySelectorAll(".slide-action").forEach(button => {
-    button.addEventListener("click", () => {
-      go(button.dataset.page);
-    });
-  });
-
-  const pauseButton = document.getElementById("pauseSlider");
-
-  pauseButton?.addEventListener("click", () => {
-    state.sliderPaused = !state.sliderPaused;
-    pauseButton.textContent = state.sliderPaused ? "Play" : "Pause";
-  });
-
-  hero.addEventListener("mouseenter", () => {
-    state.sliderPaused = true;
-  });
-
-  hero.addEventListener("mouseleave", () => {
-    state.sliderPaused = false;
-  });
-
-  hero.addEventListener("focusin", () => {
-    state.sliderPaused = true;
-  });
-
-  hero.addEventListener("focusout", () => {
-    state.sliderPaused = false;
-  });
-
-  /* Touch swipe */
-  let touchStartX = 0;
-
-  hero.addEventListener("touchstart", event => {
-    touchStartX = event.changedTouches[0].screenX;
-  }, { passive: true });
-
-  hero.addEventListener("touchend", event => {
-    const touchEndX = event.changedTouches[0].screenX;
-    const difference = touchStartX - touchEndX;
-
-    if (Math.abs(difference) < 45) return;
-
-    if (difference > 0) {
-      showSlide(state.sliderIndex + 1);
-    } else {
-      showSlide(state.sliderIndex - 1);
-    }
-
-    startSlider();
-  }, { passive: true });
-
-  /* Keyboard */
-  hero.addEventListener("keydown", event => {
-    if (event.key === "ArrowRight") {
-      showSlide(state.sliderIndex + 1);
-      startSlider();
-    }
-
-    if (event.key === "ArrowLeft") {
-      showSlide(state.sliderIndex - 1);
-      startSlider();
-    }
-  });
-
-  const homeSearch = document.getElementById("homeSearch");
-
-  homeSearch?.addEventListener("keydown", event => {
-    if (event.key === "Enter") {
-      const query = homeSearch.value.trim();
-
-      if (query) {
-        window.location.href =
-          `index.html?page=search&q=${encodeURIComponent(query)}`;
-      } else {
-        go("search");
-      }
-    }
-  });
-
-  startSlider();
-}
-
-/* =========================================================
-   HERO FILTERS
-   ========================================================= */
-
-function bindHeroFilters() {
-  const search = document.getElementById("heroSearch");
-  const role = document.getElementById("heroRole");
-  const difficulty = document.getElementById("heroDifficulty");
-  const grid = document.getElementById("heroGrid");
-
-  function update() {
-    const q = search.value.toLowerCase().trim();
-    const roleValue = role.value;
-    const difficultyValue = difficulty.value;
-
-    const filtered = HEROES.filter(hero => {
-      const matchSearch =
-        !q ||
-        hero.name.toLowerCase().includes(q) ||
-        hero.role.toLowerCase().includes(q);
-
-      const matchRole =
-        !roleValue || hero.lane === roleValue;
-
-      const matchDifficulty =
-        !difficultyValue || hero.difficulty === difficultyValue;
-
-      return matchSearch && matchRole && matchDifficulty;
-    });
-
-    grid.innerHTML =
-      filtered.length
-        ? filtered.map(renderHeroCard).join("")
-        : pendingPanel("No heroes found");
-  }
-
-  search?.addEventListener("input", update);
-  role?.addEventListener("change", update);
-  difficulty?.addEventListener("change", update);
-}
-
-/* =========================================================
-   ITEM FILTERS
-   ========================================================= */
-
-function bindItemFilters() {
-  const search = document.getElementById("itemSearch");
-  const type = document.getElementById("itemType");
-  const grid = document.getElementById("itemGrid");
-
-  function update() {
-    const q = search.value.toLowerCase().trim();
-    const typeValue = type.value;
-
-    const filtered = ITEMS.filter(item => {
-      const matchSearch =
-        !q ||
-        item.name.toLowerCase().includes(q) ||
-        item.type.toLowerCase().includes(q);
-
-      const matchType =
-        !typeValue || item.type === typeValue;
-
-      return matchSearch && matchType;
-    });
-
-    grid.innerHTML =
-      filtered.length
-        ? filtered.map(renderItemCard).join("")
-        : pendingPanel("No equipment found");
-  }
-
-  search?.addEventListener("input", update);
-  type?.addEventListener("change", update);
-}
-
-/* =========================================================
-   BUILD FILTERS
-   ========================================================= */
-
-function bindBuildFilters() {
-  const search = document.getElementById("buildSearch");
-  const type = document.getElementById("buildType");
-  const grid = document.getElementById("buildGrid");
-
-  function update() {
-    const q = search.value.toLowerCase().trim();
-    const typeValue = type.value;
-
-    const filtered = BUILDS.filter(build => {
-      const matchSearch =
-        !q ||
-        build.name.toLowerCase().includes(q) ||
-        build.hero.toLowerCase().includes(q);
-
-      const matchType =
-        !typeValue || build.type === typeValue;
-
-      return matchSearch && matchType;
-    });
-
-    grid.innerHTML =
-      filtered.length
-        ? filtered.map(renderBuildCard).join("")
-        : pendingPanel("No builds found");
-  }
-
-  search?.addEventListener("input", update);
-  type?.addEventListener("change", update);
-}
-
-/* =========================================================
-   BUILD DETAIL
-   ========================================================= */
-
-function bindBuildDetail() {
-  const button = document.getElementById("tryBuild");
-
-  button?.addEventListener("click", () => {
-    const slug = getParams().get("slug");
-    const build = buildBySlug(slug);
-
-    if (!build) return;
-
-    localStorage.setItem(
-      "hokstat_saved_build",
-      JSON.stringify(build)
-    );
-
-    window.location.href =
-      `index.html?page=calculator&build=${encodeURIComponent(build.slug)}`;
-  });
-}
-
-/* =========================================================
-   CALCULATOR
-   ========================================================= */
-
-function bindCalculator() {
-  const saved = localStorage.getItem("hokstat_saved_build");
-  const params = getParams();
-  const buildSlug = params.get("build");
-
-  if (buildSlug) {
-    const build = buildBySlug(buildSlug);
-
-    if (build) {
-      state.calculatorItems = [...build.items];
-    }
-  } else if (saved) {
-    /* Saved build remains available but isn't automatically loaded. */
-  }
-
-  const heroSelect = document.getElementById("calcHero");
-
-  heroSelect?.addEventListener("change", () => {
-    state.selectedHero = heroSelect.value;
-    showToast(`Hero selected: ${state.selectedHero}`);
-  });
-
-  document.getElementById("resetCalc")?.addEventListener("click", () => {
-    state.calculatorItems = [null, null, null, null, null, null];
-    updateCalculatorUI();
-    showToast("Calculator reset.");
-  });
-
-  document.getElementById("saveCalc")?.addEventListener("click", () => {
-    const build = {
-      hero: state.selectedHero,
-      items: [...state.calculatorItems],
-      savedAt: new Date().toISOString()
-    };
-
-    localStorage.setItem(
-      "hokstat_calculator_build",
-      JSON.stringify(build)
-    );
-
-    showToast("Build saved locally.");
-  });
-
-  document.getElementById("shareCalc")?.addEventListener("click", () => {
-    const encoded = btoa(
-      JSON.stringify({
-        hero: state.selectedHero,
-        items: state.calculatorItems
-      })
-    );
-
-    const url =
-      `${window.location.origin}${window.location.pathname}?page=calculator&builddata=${encodeURIComponent(encoded)}`;
-
-    if (navigator.share) {
-      navigator.share({
-        title: "HoKStat.gg Build",
-        text: "HoKStat.gg calculator build",
-        url
-      }).catch(() => {});
-    } else {
-      showToast("Share link generated in the browser URL.");
-      window.history.replaceState({}, "", url);
-    }
-  });
-
-  const buildData = params.get("builddata");
-
-  if (buildData) {
-    try {
-      const decoded = JSON.parse(atob(buildData));
-
-      if (Array.isArray(decoded.items)) {
-        state.calculatorItems =
-          decoded.items.slice(0, 6).map(id =>
-            ITEMS.some(item => item.id === id) ? id : null
-          );
-      }
-
-      if (decoded.hero) {
-        state.selectedHero = decoded.hero;
-
-        if (heroSelect) {
-          heroSelect.value = decoded.hero;
+const Storage = {
+    get(key, fallback = null) {
+        try {
+            const value = localStorage.getItem(key);
+
+            if (value === null) {
+                return fallback;
+            }
+
+            return JSON.parse(value);
+        } catch (error) {
+            console.warn(`[HoKStats] Storage read failed: ${key}`, error);
+            return fallback;
         }
-      }
-    } catch {
-      showToast("Could not read shared build.");
+    },
+
+    set(key, value) {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+            return true;
+        } catch (error) {
+            console.warn(`[HoKStats] Storage write failed: ${key}`, error);
+            return false;
+        }
+    },
+
+    remove(key) {
+        try {
+            localStorage.removeItem(key);
+        } catch (error) {
+            console.warn(`[HoKStats] Storage remove failed: ${key}`, error);
+        }
     }
-  }
+};
 
-  bindCalculatorSlots();
-  updateCalculatorUI();
-}
 
 /* =========================================================
-   COMMUNITY
+   3. APPLICATION STATE
    ========================================================= */
 
-function bindCommunity() {
-  document.getElementById("askQuestion")?.addEventListener("click", () => {
-    showToast("Community posting will be enabled with user authentication.");
-  });
-}
+const AppState = {
+    page: HOKSTATS_CONFIG.defaultPage,
+
+    currentHero: null,
+    currentEquipment: null,
+    currentBuild: null,
+
+    language: Storage.get(
+        HOKSTATS_CONFIG.storageKeys.language,
+        "en"
+    ),
+
+    searchQuery: "",
+
+    heroFilter: {
+        role: "all",
+        lane: "all",
+        difficulty: "all",
+        sort: "name"
+    },
+
+    equipmentFilter: {
+        type: "all",
+        sort: "name",
+        query: ""
+    },
+
+    metaRole: "overview",
+
+    communityFilter: "recent",
+
+    calculator: {
+        heroId: null,
+        slots: Array(HOKSTATS_CONFIG.calculator.slots).fill(null)
+    },
+
+    bookmarks: Storage.get(
+        HOKSTATS_CONFIG.storageKeys.bookmarks,
+        []
+    ),
+
+    slider: {
+        index: 0,
+        timer: null,
+        paused: false,
+        initialized: false
+    },
+
+    mobileMenuOpen: false,
+
+    searchOpen: false,
+
+    modalOpen: false
+};
+
 
 /* =========================================================
-   SEARCH
+   4. UTILITY FUNCTIONS
    ========================================================= */
 
-function bindSearch() {
-  const input = document.getElementById("globalSearch");
-  const results = document.getElementById("searchResults");
+const Utils = {
 
-  const initialQuery = getParams().get("q") || "";
+    escapeHTML(value) {
+        if (value === null || value === undefined) {
+            return "";
+        }
 
-  if (input) {
-    input.value = initialQuery;
-  }
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    },
 
-  if (results) {
-    results.innerHTML = renderSearchResults(initialQuery);
-  }
+    slugify(value) {
+        return String(value || "")
+            .toLowerCase()
+            .trim()
+            .replace(/[^\w\s-]/g, "")
+            .replace(/\s+/g, "-")
+            .replace(/-+/g, "-");
+    },
 
-  input?.addEventListener("input", () => {
-    results.innerHTML = renderSearchResults(input.value);
-  });
-}
+    formatNumber(value) {
+        const number = Number(value);
+
+        if (!Number.isFinite(number)) {
+            return "—";
+        }
+
+        return new Intl.NumberFormat("en-US").format(number);
+    },
+
+    formatPercent(value, decimals = 1) {
+        const number = Number(value);
+
+        if (!Number.isFinite(number)) {
+            return "—";
+        }
+
+        return `${number.toFixed(decimals)}%`;
+    },
+
+    clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    },
+
+    capitalize(value) {
+        if (!value) {
+            return "";
+        }
+
+        return value.charAt(0).toUpperCase() + value.slice(1);
+    },
+
+    debounce(callback, delay = 200) {
+        let timeout;
+
+        return (...args) => {
+            clearTimeout(timeout);
+
+            timeout = setTimeout(() => {
+                callback(...args);
+            }, delay);
+        };
+    },
+
+    throttle(callback, delay = 100) {
+        let waiting = false;
+
+        return (...args) => {
+            if (waiting) {
+                return;
+            }
+
+            waiting = true;
+
+            callback(...args);
+
+            setTimeout(() => {
+                waiting = false;
+            }, delay);
+        };
+    },
+
+    safeImage(url, fallback = "") {
+        if (!url || typeof url !== "string") {
+            return fallback;
+        }
+
+        return url;
+    },
+
+    getInitials(name) {
+        return String(name || "")
+            .split(" ")
+            .map(part => part.charAt(0))
+            .join("")
+            .slice(0, 2)
+            .toUpperCase();
+    },
+
+    isMobile() {
+        return window.matchMedia("(max-width: 768px)").matches;
+    },
+
+    prefersReducedMotion() {
+        return window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+        ).matches;
+    },
+
+    getQueryParams() {
+        const params = new URLSearchParams(window.location.search);
+
+        return {
+            page: params.get("page"),
+            slug: params.get("slug"),
+            id: params.get("id"),
+            query: params.get("q")
+        };
+    },
+
+    updateURL(params = {}, replace = false) {
+        const url = new URL(window.location.href);
+
+        Object.entries(params).forEach(([key, value]) => {
+            if (
+                value === null ||
+                value === undefined ||
+                value === ""
+            ) {
+                url.searchParams.delete(key);
+            } else {
+                url.searchParams.set(key, value);
+            }
+        });
+
+        if (replace) {
+            history.replaceState({}, "", url);
+        } else {
+            history.pushState({}, "", url);
+        }
+    },
+
+    scrollTop() {
+        window.scrollTo({
+            top: 0,
+            behavior: Utils.prefersReducedMotion()
+                ? "auto"
+                : "smooth"
+        });
+    },
+
+    wait(ms) {
+        return new Promise(resolve => {
+            setTimeout(resolve, ms);
+        });
+    }
+};
+
 
 /* =========================================================
-   MOBILE MENU
+   5. DEMO DATA LAYER
+   =========================================================
+
+   This is intentionally isolated.
+
+   Later:
+   API.getHeroes()
+   API.getEquipment()
+   API.getBuilds()
+   etc.
+
+   can replace these datasets without rewriting UI logic.
    ========================================================= */
 
-function bindMenu() {
-  const button = document.getElementById("menuButton");
-  const menu = document.getElementById("mobileMenu");
+const DATA = {
 
-  if (!button || !menu) return;
+    heroes: [
+        {
+            id: "dun",
+            slug: "dun",
+            name: "Dun",
+            role: "fighter",
+            lane: "clash",
+            difficulty: "medium",
+            releaseDate: "2024-01-01",
 
-  button.addEventListener("click", () => {
-    menu.classList.toggle("open");
-  });
-}
+            bio:
+                "Dun is a durable fighter built around sustained combat, control and frontline pressure. His kit lets him stay involved in extended fights while creating opportunities for his team.",
+
+            imageUrl: "",
+            artUrl: "",
+
+            stats: {
+                hp: 3500,
+                physicalAttack: 170,
+                magicAttack: 0,
+                physicalDefense: 145,
+                magicDefense: 95,
+                attackSpeed: 0.85,
+                movementSpeed: 380,
+                critRate: 0,
+                cooldownReduction: 0
+            },
+
+            skills: [
+                {
+                    name: "Passive",
+                    type: "passive",
+                    description:
+                        "A defensive combat effect that improves Dun's ability to survive prolonged engagements.",
+                    iconUrl: ""
+                },
+                {
+                    name: "Skill 1",
+                    type: "active",
+                    description:
+                        "Dun attacks in a controlled area and applies pressure to nearby enemies.",
+                    iconUrl: ""
+                },
+                {
+                    name: "Skill 2",
+                    type: "active",
+                    description:
+                        "Dun gains additional combat utility while continuing his frontline pressure.",
+                    iconUrl: ""
+                },
+                {
+                    name: "Ultimate",
+                    type: "ultimate",
+                    description:
+                        "Dun engages from range and creates a strong opportunity for follow-up.",
+                    iconUrl: ""
+                }
+            ],
+
+            skins: [],
+
+            patchHistory: [
+                {
+                    version: "1.0.0",
+                    date: "2026-01-01",
+                    description: "Initial database entry."
+                }
+            ]
+        },
+
+        {
+            id: "loong",
+            slug: "loong",
+            name: "Loong",
+            role: "marksman",
+            lane: "farm",
+            difficulty: "hard",
+            releaseDate: "2024-02-01",
+
+            bio:
+                "Loong is a ranged damage dealer who relies on positioning, sustained attacks and careful ability usage to maintain pressure throughout a fight.",
+
+            imageUrl: "",
+            artUrl: "",
+
+            stats: {
+                hp: 2850,
+                physicalAttack: 205,
+                magicAttack: 0,
+                physicalDefense: 85,
+                magicDefense: 70,
+                attackSpeed: 1.0,
+                movementSpeed: 360,
+                critRate: 0,
+                cooldownReduction: 0
+            },
+
+            skills: [
+                {
+                    name: "Passive",
+                    type: "passive",
+                    description:
+                        "Provides additional combat value through Loong's ranged attack pattern.",
+                    iconUrl: ""
+                },
+                {
+                    name: "Skill 1",
+                    type: "active",
+                    description:
+                        "A ranged ability used for damage and lane pressure.",
+                    iconUrl: ""
+                },
+                {
+                    name: "Skill 2",
+                    type: "active",
+                    description:
+                        "Adds another layer of ranged combat utility.",
+                    iconUrl: ""
+                },
+                {
+                    name: "Ultimate",
+                    type: "ultimate",
+                    description:
+                        "A high-impact ranged ability that rewards good positioning.",
+                    iconUrl: ""
+                }
+            ],
+
+            skins: [],
+
+            patchHistory: []
+        },
+
+        {
+            id: "feyd",
+            slug: "feyd",
+            name: "Feyd",
+            role: "assassin",
+            lane: "jungle",
+            difficulty: "hard",
+            releaseDate: "2024-03-01",
+
+            bio:
+                "Feyd is an aggressive assassin focused on mobility, burst damage and finding isolated targets. He rewards precise timing and strong map awareness.",
+
+            imageUrl: "",
+            artUrl: "",
+
+            stats: {
+                hp: 3000,
+                physicalAttack: 220,
+                magicAttack: 0,
+                physicalDefense: 90,
+                magicDefense: 75,
+                attackSpeed: 1.05,
+                movementSpeed: 390,
+                critRate: 0,
+                cooldownReduction: 0
+            },
+
+            skills: [
+                {
+                    name: "Passive",
+                    type: "passive",
+                    description:
+                        "Enhances Feyd's ability to create burst windows during combat.",
+                    iconUrl: ""
+                },
+                {
+                    name: "Skill 1",
+                    type: "active",
+                    description:
+                        "A mobility-focused attack for engaging or repositioning.",
+                    iconUrl: ""
+                },
+                {
+                    name: "Skill 2",
+                    type: "active",
+                    description:
+                        "Provides additional burst and target pressure.",
+                    iconUrl: ""
+                },
+                {
+                    name: "Ultimate",
+                    type: "ultimate",
+                    description:
+                        "A high-impact assassination tool that rewards precise execution.",
+                    iconUrl: ""
+                }
+            ],
+
+            skins: [],
+
+            patchHistory: []
+        },
+
+        {
+            id: "ming",
+            slug: "ming",
+            name: "Ming",
+            role: "support",
+            lane: "roam",
+            difficulty: "medium",
+            releaseDate: "2024-04-01",
+
+            bio:
+                "Ming is a support hero centered around empowering allies, controlling fights and maintaining useful utility throughout team engagements.",
+
+            imageUrl: "",
+            artUrl: "",
+
+            stats: {
+                hp: 3150,
+                physicalAttack: 120,
+                magicAttack: 100,
+                physicalDefense: 115,
+                magicDefense: 110,
+                attackSpeed: 0.85,
+                movementSpeed: 370,
+                critRate: 0,
+                cooldownReduction: 0
+            },
+
+            skills: [
+                {
+                    name: "Passive",
+                    type: "passive",
+                    description:
+                        "Provides supportive value during repeated engagements.",
+                    iconUrl: ""
+                },
+                {
+                    name: "Skill 1",
+                    type: "active",
+                    description:
+                        "Provides utility for allies and pressure against enemies.",
+                    iconUrl: ""
+                },
+                {
+                    name: "Skill 2",
+                    type: "active",
+                    description:
+                        "Adds additional teamfight utility.",
+                    iconUrl: ""
+                },
+                {
+                    name: "Ultimate",
+                    type: "ultimate",
+                    description:
+                        "A major supportive ability used during important teamfights.",
+                    iconUrl: ""
+                }
+            ],
+
+            skins: [],
+
+            patchHistory: []
+        }
+    ],
+
+
+    equipment: [
+        {
+            id: "boots-of-deftness",
+            slug: "boots-of-deftness",
+            name: "Boots of Deftness",
+            type: "boots",
+            price: 710,
+            iconUrl: "",
+            description:
+                "A movement-focused equipment option.",
+            stats: {
+                movementSpeed: 60
+            },
+            passives: [
+                {
+                    name: "Mobility",
+                    description:
+                        "Provides additional movement utility."
+                }
+            ]
+        },
+
+        {
+            id: "storm-sword",
+            slug: "storm-sword",
+            name: "Storm Sword",
+            type: "attack",
+            price: 1950,
+            iconUrl: "",
+            description:
+                "An offensive equipment item designed to increase physical pressure.",
+            stats: {
+                physicalAttack: 100,
+                attackSpeed: 15
+            },
+            passives: [
+                {
+                    name: "Storm Edge",
+                    description:
+                        "Improves offensive pressure."
+                }
+            ]
+        },
+
+        {
+            id: "guard-armor",
+            slug: "guard-armor",
+            name: "Guardian Armor",
+            type: "defense",
+            price: 2100,
+            iconUrl: "",
+            description:
+                "A defensive item designed for frontline durability.",
+            stats: {
+                hp: 1000,
+                physicalDefense: 120
+            },
+            passives: [
+                {
+                    name: "Guardian",
+                    description:
+                        "Improves survivability against physical pressure."
+                }
+            ]
+        },
+
+        {
+            id: "arcane-mantle",
+            slug: "arcane-mantle",
+            name: "Arcane Mantle",
+            type: "magic-defense",
+            price: 2050,
+            iconUrl: "",
+            description:
+                "A defensive option focused on magical resistance.",
+            stats: {
+                hp: 600,
+                magicDefense: 120
+            },
+            passives: [
+                {
+                    name: "Arcane Ward",
+                    description:
+                        "Improves protection against magical damage."
+                }
+            ]
+        },
+
+        {
+            id: "piercing-blade",
+            slug: "piercing-blade",
+            name: "Piercing Blade",
+            type: "attack",
+            price: 2200,
+            iconUrl: "",
+            description:
+                "An offensive equipment item that provides physical penetration.",
+            stats: {
+                physicalAttack: 85,
+                physicalPenetration: 45
+            },
+            passives: [
+                {
+                    name: "Pierce",
+                    description:
+                        "Improves physical penetration."
+                }
+            ]
+        },
+
+        {
+            id: "critical-edge",
+            slug: "critical-edge",
+            name: "Critical Edge",
+            type: "crit",
+            price: 2300,
+            iconUrl: "",
+            description:
+                "An offensive item focused on critical strike performance.",
+            stats: {
+                physicalAttack: 80,
+                critRate: 25
+            },
+            passives: [
+                {
+                    name: "Critical Force",
+                    description:
+                        "Improves critical strike performance."
+                }
+            ]
+        },
+
+        {
+            id: "mana-core",
+            slug: "mana-core",
+            name: "Mana Core",
+            type: "magic",
+            price: 1800,
+            iconUrl: "",
+            description:
+                "A magic-focused equipment option.",
+            stats: {
+                magicAttack: 120,
+                cooldownReduction: 10
+            },
+            passives: [
+                {
+                    name: "Arcane Power",
+                    description:
+                        "Improves magical ability output."
+                }
+            ]
+        },
+
+        {
+            id: "swift-greaves",
+            slug: "swift-greaves",
+            name: "Swift Greaves",
+            type: "boots",
+            price: 710,
+            iconUrl: "",
+            description:
+                "Lightweight boots focused on attack speed.",
+            stats: {
+                movementSpeed: 50,
+                attackSpeed: 20
+            },
+            passives: []
+        }
+    ],
+
+
+    builds: [
+        {
+            id: "dun-frontline",
+            slug: "dun-frontline",
+            name: "Frontline Dun",
+            heroId: "dun",
+            type: "recommended",
+            description:
+                "A durable setup designed for extended frontline engagements.",
+            author: "HoKStats.gg",
+            source: "HoKStats.gg",
+            items: [
+                "boots-of-deftness",
+                "guard-armor",
+                "arcane-mantle",
+                "storm-sword",
+                "piercing-blade",
+                "critical-edge"
+            ]
+        },
+
+        {
+            id: "feyd-burst",
+            slug: "feyd-burst",
+            name: "Burst Feyd",
+            heroId: "feyd",
+            type: "recommended",
+            description:
+                "An aggressive physical-damage setup focused on burst pressure.",
+            author: "HoKStats.gg",
+            source: "HoKStats.gg",
+            items: [
+                "swift-greaves",
+                "storm-sword",
+                "piercing-blade",
+                "critical-edge",
+                "critical-edge",
+                "storm-sword"
+            ]
+        }
+    ],
+
+
+    patches: [
+        {
+            id: "patch-1-0-0",
+            version: "1.0.0",
+            title: "Season Update",
+            date: "2026-09-01",
+            season: "Current Season",
+            status: "current",
+            summary:
+                "Current game version information will be populated from verified official data.",
+            source: "",
+            heroChanges: [],
+            equipmentChanges: [],
+            systemChanges: [],
+            newContent: []
+        },
+
+        {
+            id: "patch-0-9-5",
+            version: "0.9.5",
+            title: "Previous Update",
+            date: "2026-08-01",
+            season: "Previous Season",
+            status: "historical",
+            summary:
+                "Historical patch entry retained for comparison and reference.",
+            source: "",
+            heroChanges: [],
+            equipmentChanges: [],
+            systemChanges: [],
+            newContent: []
+        }
+    ],
+
+
+    news: [
+        {
+            id: "news-1",
+            slug: "official-update",
+            title: "Official Game Update",
+            category: "OFFICIAL",
+            status: "CONFIRMED",
+            date: "2026-09-01",
+            summary:
+                "Official announcements and verified game updates will appear here.",
+            content:
+                "This content area is ready for verified official news.",
+            imageUrl: "",
+            source: ""
+        },
+
+        {
+            id: "news-2",
+            slug: "upcoming-content",
+            title: "Upcoming Content",
+            category: "COMING_SOON",
+            status: "CONFIRMED",
+            date: "2026-09-10",
+            summary:
+                "Officially announced future content can be tracked separately from live data.",
+            content:
+                "Future official content will be displayed here.",
+            imageUrl: "",
+            source: ""
+        },
+
+        {
+            id: "news-3",
+            slug: "community-rumor",
+            title: "Community Rumor",
+            category: "RUMOR",
+            status: "UNCONFIRMED",
+            date: "2026-09-12",
+            summary:
+                "Unconfirmed information is clearly separated from verified game data.",
+            content:
+                "This is an unconfirmed community report and does not affect the Live Database.",
+            imageUrl: "",
+            source: ""
+        }
+    ],
+
+
+    guides: [
+        {
+            id: "guide-1",
+            slug: "how-to-read-hero-stats",
+            title: "How to Read Hero Stats",
+            category: "BEGINNER",
+            heroId: null,
+            patchVersion: "1.0.0",
+            author: "HoKStats.gg",
+            summary:
+                "Understand the most important hero statistics before comparing builds.",
+            content:
+                "Hero statistics provide the foundation for understanding how a hero scales and how equipment changes the final result.",
+            imageUrl: ""
+        },
+
+        {
+            id: "guide-2",
+            slug: "dun-basics",
+            title: "Dun Basics",
+            category: "HERO",
+            heroId: "dun",
+            patchVersion: "1.0.0",
+            author: "HoKStats.gg",
+            summary:
+                "A concise introduction to Dun's role, abilities and basic combat identity.",
+            content:
+                "Use the Hero page for the quick explanation. Deeper strategy belongs in Guides.",
+            imageUrl: ""
+        }
+    ],
+
+
+    meta: {
+        overview: [
+            {
+                heroId: "dun",
+                role: "fighter",
+                winRate: null,
+                pickRate: null,
+                banRate: null,
+                trend: "—"
+            },
+            {
+                heroId: "loong",
+                role: "marksman",
+                winRate: null,
+                pickRate: null,
+                banRate: null,
+                trend: "—"
+            },
+            {
+                heroId: "feyd",
+                role: "assassin",
+                winRate: null,
+                pickRate: null,
+                banRate: null,
+                trend: "—"
+            },
+            {
+                heroId: "ming",
+                role: "support",
+                winRate: null,
+                pickRate: null,
+                banRate: null,
+                trend: "—"
+            }
+        ],
+
+        clash: [],
+        jungle: [],
+        mid: [],
+        farm: [],
+        roam: []
+    },
+
+
+    community: {
+        questions: [
+            {
+                id: "q1",
+                title: "How does the calculator handle equipment stats?",
+                content:
+                    "I want to understand how base stats and equipment stats are combined.",
+                category: "CALCULATOR",
+                author: "Community",
+                answers: 2,
+                votes: 5,
+                date: "2026-09-20"
+            },
+
+            {
+                id: "q2",
+                title: "What is the difference between live and test data?",
+                content:
+                    "Does the database separate test-server values from live values?",
+                category: "DATA",
+                author: "Community",
+                answers: 4,
+                votes: 8,
+                date: "2026-09-19"
+            },
+
+            {
+                id: "q3",
+                title: "Which equipment should I compare first?",
+                content:
+                    "Looking for a simple way to compare item stats.",
+                category: "EQUIPMENT",
+                author: "Community",
+                answers: 1,
+                votes: 3,
+                date: "2026-09-18"
+            }
+        ]
+    }
+};
+
 
 /* =========================================================
-   INIT
+   6. API ABSTRACTION
+   =========================================================
+
+   Real backend can replace these functions later.
+
+   No frontend secret/API key should ever be placed here.
    ========================================================= */
 
-function init() {
-  bindMenu();
-  renderPage();
+const API = {
+
+    async getHeroes() {
+        return DATA.heroes;
+    },
+
+    async getHero(slug) {
+        return DATA.heroes.find(
+            hero => hero.slug === slug
+        ) || null;
+    },
+
+    async getEquipment() {
+        return DATA.equipment;
+    },
+
+    async getEquipmentItem(slug) {
+        return DATA.equipment.find(
+            item => item.slug === slug
+        ) || null;
+    },
+
+    async getBuilds() {
+        return DATA.builds;
+    },
+
+    async getBuild(slug) {
+        return DATA.builds.find(
+            build => build.slug === slug
+        ) || null;
+    },
+
+    async getPatches() {
+        return DATA.patches;
+    },
+
+    async getNews() {
+        return DATA.news;
+    },
+
+    async getGuides() {
+        return DATA.guides;
+    },
+
+    async getMeta(role = "overview") {
+        return DATA.meta[role] || [];
+    },
+
+    async getQuestions() {
+        return DATA.community.questions;
+    }
+};
+
+
+/* =========================================================
+   7. DOM HELPERS
+   ========================================================= */
+
+const DOM = {
+
+    app() {
+        return document.querySelector("#app");
+    },
+
+    query(selector, root = document) {
+        return root.querySelector(selector);
+    },
+
+    queryAll(selector, root = document) {
+        return Array.from(root.querySelectorAll(selector));
+    },
+
+    create(tag, className = "", html = "") {
+        const element = document.createElement(tag);
+
+        if (className) {
+            element.className = className;
+        }
+
+        if (html) {
+            element.innerHTML = html;
+        }
+
+        return element;
+    }
+};
+
+
+/* =========================================================
+   8. TOAST SYSTEM
+   ========================================================= */
+
+const Toast = {
+
+    show(message, type = "info", duration = 2800) {
+
+        let root = document.querySelector("#toast-root");
+
+        if (!root) {
+            root = DOM.create("div", "toast-root");
+            root.id = "toast-root";
+            document.body.appendChild(root);
+        }
+
+        const toast = DOM.create(
+            "div",
+            `toast toast-${type}`
+        );
+
+        toast.setAttribute("role", "status");
+
+        toast.innerHTML = `
+            <div class="toast-content">
+                <span class="toast-dot"></span>
+                <span>${Utils.escapeHTML(message)}</span>
+            </div>
+            <button
+                type="button"
+                class="toast-close"
+                aria-label="Close notification"
+            >×</button>
+        `;
+
+        root.appendChild(toast);
+
+        const close = () => {
+            toast.classList.add("is-leaving");
+
+            setTimeout(() => {
+                toast.remove();
+            }, 180);
+        };
+
+        toast
+            .querySelector(".toast-close")
+            ?.addEventListener("click", close);
+
+        setTimeout(close, duration);
+    }
+};
+
+
+/* =========================================================
+   9. MODAL SYSTEM
+   ========================================================= */
+
+const Modal = {
+
+    open(content, options = {}) {
+
+        this.close();
+
+        const overlay = DOM.create(
+            "div",
+            "modal-overlay"
+        );
+
+        overlay.id = "global-modal";
+
+        overlay.innerHTML = `
+            <div
+                class="modal"
+                role="dialog"
+                aria-modal="true"
+                aria-label="${Utils.escapeHTML(
+                    options.title || "HoKStats"
+                )}"
+            >
+                <div class="modal-header">
+                    <div>
+                        ${
+                            options.eyebrow
+                                ? `<div class="eyebrow">${Utils.escapeHTML(options.eyebrow)}</div>`
+                                : ""
+                        }
+
+                        ${
+                            options.title
+                                ? `<h2>${Utils.escapeHTML(options.title)}</h2>`
+                                : ""
+                        }
+                    </div>
+
+                    <button
+                        type="button"
+                        class="modal-close"
+                        data-modal-close
+                        aria-label="Close"
+                    >×</button>
+                </div>
+
+                <div class="modal-body">
+                    ${content}
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        AppState.modalOpen = true;
+
+        overlay
+            .querySelector("[data-modal-close]")
+            ?.addEventListener("click", () => this.close());
+
+        overlay.addEventListener("click", event => {
+            if (event.target === overlay) {
+                this.close();
+            }
+        });
+
+        document.addEventListener(
+            "keydown",
+            this.keyHandler
+        );
+    },
+
+    keyHandler(event) {
+        if (event.key === "Escape") {
+            Modal.close();
+        }
+    },
+
+    close() {
+        const modal = document.querySelector("#global-modal");
+
+        if (modal) {
+            modal.remove();
+        }
+
+        AppState.modalOpen = false;
+
+        document.removeEventListener(
+            "keydown",
+            this.keyHandler
+        );
+    }
+};
+
+
+/* =========================================================
+   10. BOOKMARK SYSTEM
+   ========================================================= */
+
+const Bookmarks = {
+
+    makeKey(type, id) {
+        return `${type}:${id}`;
+    },
+
+    isSaved(type, id) {
+        const key = this.makeKey(type, id);
+
+        return AppState.bookmarks.includes(key);
+    },
+
+    toggle(type, id) {
+
+        const key = this.makeKey(type, id);
+
+        const index = AppState.bookmarks.indexOf(key);
+
+        if (index >= 0) {
+            AppState.bookmarks.splice(index, 1);
+
+            Toast.show(
+                "Removed from bookmarks.",
+                "info"
+            );
+        } else {
+            AppState.bookmarks.push(key);
+
+            Toast.show(
+                "Saved to bookmarks.",
+                "success"
+            );
+        }
+
+        Storage.set(
+            HOKSTATS_CONFIG.storageKeys.bookmarks,
+            AppState.bookmarks
+        );
+
+        this.refreshButtons(type, id);
+    },
+
+    refreshButtons(type, id) {
+
+        const saved = this.isSaved(type, id);
+
+        DOM.queryAll(
+            `[data-bookmark-type="${type}"][data-bookmark-id="${id}"]`
+        ).forEach(button => {
+
+            button.classList.toggle(
+                "is-saved",
+                saved
+            );
+
+            button.setAttribute(
+                "aria-pressed",
+                saved ? "true" : "false"
+            );
+
+            const label = button.querySelector(
+                ".bookmark-label"
+            );
+
+            if (label) {
+                label.textContent = saved
+                    ? "Saved"
+                    : "Save";
+            }
+        });
+    }
+};
+
+
+/* =========================================================
+   11. IMAGE / ARTWORK HELPERS
+   ========================================================= */
+
+const Media = {
+
+    image(url, alt, className = "") {
+
+        if (url) {
+            return `
+                <img
+                    src="${Utils.escapeHTML(url)}"
+                    alt="${Utils.escapeHTML(alt)}"
+                    class="${Utils.escapeHTML(className)}"
+                    loading="lazy"
+                >
+            `;
+        }
+
+        return `
+            <div
+                class="media-placeholder ${Utils.escapeHTML(className)}"
+                role="img"
+                aria-label="${Utils.escapeHTML(alt)}"
+            >
+                <div class="media-placeholder-grid"></div>
+                <div class="media-placeholder-mark">
+                    <span>HoK</span>
+                    <small>ARTWORK</small>
+                </div>
+            </div>
+        `;
+    },
+
+    icon(url, name, className = "") {
+
+        if (url) {
+            return `
+                <img
+                    src="${Utils.escapeHTML(url)}"
+                    alt="${Utils.escapeHTML(name)}"
+                    class="${Utils.escapeHTML(className)}"
+                    loading="lazy"
+                >
+            `;
+        }
+
+        return `
+            <div
+                class="item-icon-placeholder ${Utils.escapeHTML(className)}"
+                aria-label="${Utils.escapeHTML(name)}"
+            >
+                <span>${Utils.escapeHTML(
+                    Utils.getInitials(name)
+                )}</span>
+            </div>
+        `;
+    }
+};
+
+
+/* =========================================================
+   12. NAVIGATION
+   ========================================================= */
+
+const Navigation = {
+
+    init() {
+
+        document.addEventListener(
+            "click",
+            event => {
+
+                const link = event.target.closest(
+                    "[data-page]"
+                );
+
+                if (!link) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                const page = link.dataset.page;
+
+                const slug = link.dataset.slug || null;
+
+                const id = link.dataset.id || null;
+
+                this.go(page, {
+                    slug,
+                    id
+                });
+            }
+        );
+
+        window.addEventListener(
+            "popstate",
+            () => {
+                this.loadFromURL();
+            }
+        );
+    },
+
+    async go(page, options = {}) {
+
+        if (!page) {
+            page = "home";
+        }
+
+        AppState.page = page;
+
+        if (options.slug) {
+            Utils.updateURL({
+                page,
+                slug: options.slug,
+                id: options.id || null
+            });
+        } else {
+            Utils.updateURL({
+                page,
+                slug: null,
+                id: options.id || null
+            });
+        }
+
+        this.closeMobileMenu();
+
+        await Router.render();
+
+        Utils.scrollTop();
+    },
+
+    loadFromURL() {
+
+        const params = Utils.getQueryParams();
+
+        if (!params.page) {
+            AppState.page = "home";
+        } else {
+            AppState.page = params.page;
+        }
+
+        if (params.slug) {
+            AppState.currentHero =
+                DATA.heroes.find(
+                    hero => hero.slug === params.slug
+                ) || null;
+
+            AppState.currentEquipment =
+                DATA.equipment.find(
+                    item => item.slug === params.slug
+                ) || null;
+
+            AppState.currentBuild =
+                DATA.builds.find(
+                    build => build.slug === params.slug
+                ) || null;
+        }
+
+        Router.render();
+    },
+
+    closeMobileMenu() {
+
+        AppState.mobileMenuOpen = false;
+
+        document.body.classList.remove(
+            "mobile-menu-open"
+        );
+
+        DOM.queryAll(
+            ".mobile-menu-toggle, [data-mobile-menu-toggle]"
+        ).forEach(button => {
+            button.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+        });
+
+        const menu = DOM.query(
+            "#mobile-menu"
+        );
+
+        if (menu) {
+            menu.classList.remove("is-open");
+        }
+    },
+
+    toggleMobileMenu() {
+
+        AppState.mobileMenuOpen =
+            !AppState.mobileMenuOpen;
+
+        document.body.classList.toggle(
+            "mobile-menu-open",
+            AppState.mobileMenuOpen
+        );
+
+        const menu = DOM.query(
+            "#mobile-menu"
+        );
+
+        if (menu) {
+            menu.classList.toggle(
+                "is-open",
+                AppState.mobileMenuOpen
+            );
+        }
+
+        DOM.queryAll(
+            ".mobile-menu-toggle, [data-mobile-menu-toggle]"
+        ).forEach(button => {
+            button.setAttribute(
+                "aria-expanded",
+                AppState.mobileMenuOpen
+                    ? "true"
+                    : "false"
+            );
+        });
+    }
+};
+
+
+/* =========================================================
+   13. ROUTER
+   ========================================================= */
+
+const Router = {
+
+    async render() {
+
+        const app = DOM.app();
+
+        if (!app) {
+            console.error(
+                "[HoKStats] #app was not found."
+            );
+            return;
+        }
+
+        app.classList.remove("page-enter");
+
+        void app.offsetWidth;
+
+        app.classList.add("page-enter");
+
+        try {
+
+            switch (AppState.page) {
+
+                case "home":
+                    await Pages.home(app);
+                    break;
+
+                case "heroes":
+                    await Pages.heroes(app);
+                    break;
+
+                case "hero":
+                    await Pages.heroDetail(app);
+                    break;
+
+                case "equipment":
+                    await Pages.equipment(app);
+                    break;
+
+                case "item":
+                    await Pages.equipmentDetail(app);
+                    break;
+
+                case "calculator":
+                    await Pages.calculator(app);
+                    break;
+
+                case "builds":
+                    await Pages.builds(app);
+                    break;
+
+                case "build":
+                    await Pages.buildDetail(app);
+                    break;
+
+                case "meta":
+                    await Pages.meta(app);
+                    break;
+
+                case "patches":
+                    await Pages.patches(app);
+                    break;
+
+                case "patch":
+                    await Pages.patchDetail(app);
+                    break;
+
+                case "news":
+                    await Pages.news(app);
+                    break;
+
+                case "guides":
+                    await Pages.guides(app);
+                    break;
+
+                case "guide":
+                    await Pages.guideDetail(app);
+                    break;
+
+                case "community":
+                    await Pages.community(app);
+                    break;
+
+                case "search":
+                    await Pages.search(app);
+                    break;
+
+                case "about":
+                    await Pages.about(app);
+                    break;
+
+                case "data":
+                    await Pages.data(app);
+                    break;
+
+                case "admin":
+                    await Pages.admin(app);
+                    break;
+
+                default:
+                    await Pages.notFound(app);
+                    break;
+            }
+
+        } catch (error) {
+
+            console.error(
+                "[HoKStats] Page render error:",
+                error
+            );
+
+            app.innerHTML = Render.errorState(
+                "Something went wrong while loading this page."
+            );
+        }
+
+        AppUI.refreshActiveNavigation();
+
+        Search.bindDynamicSearch();
+
+        Calculator.bindDynamic();
+
+        AppUI.bindDynamicActions();
+    }
+};
+
+
+/* =========================================================
+   14. RENDER HELPERS
+   ========================================================= */
+
+const Render = {
+
+    pageHeader({
+        eyebrow = "",
+        title = "",
+        description = "",
+        actions = ""
+    } = {}) {
+
+        return `
+            <section class="page-header">
+                <div class="page-header-copy">
+
+                    ${
+                        eyebrow
+                            ? `<div class="eyebrow">${Utils.escapeHTML(eyebrow)}</div>`
+                            : ""
+                    }
+
+                    <h1>${Utils.escapeHTML(title)}</h1>
+
+                    ${
+                        description
+                            ? `<p>${Utils.escapeHTML(description)}</p>`
+                            : ""
+                    }
+
+                </div>
+
+                ${
+                    actions
+                        ? `<div class="page-header-actions">${actions}</div>`
+                        : ""
+                }
+            </section>
+        `;
+    },
+
+    sectionHeader(title, description = "", action = "") {
+
+        return `
+            <div class="section-heading">
+
+                <div>
+                    <h2>${Utils.escapeHTML(title)}</h2>
+
+                    ${
+                        description
+                            ? `<p>${Utils.escapeHTML(description)}</p>`
+                            : ""
+                    }
+                </div>
+
+                ${
+                    action
+                        ? `<div class="section-heading-action">${action}</div>`
+                        : ""
+                }
+
+            </div>
+        `;
+    },
+
+    badge(text, type = "neutral") {
+
+        return `
+            <span class="badge badge-${Utils.escapeHTML(type)}">
+                ${Utils.escapeHTML(text)}
+            </span>
+        `;
+    },
+
+    bookmark(type, id) {
+
+        const saved = Bookmarks.isSaved(
+            type,
+            id
+        );
+
+        return `
+            <button
+                type="button"
+                class="bookmark-button ${saved ? "is-saved" : ""}"
+                data-bookmark-type="${Utils.escapeHTML(type)}"
+                data-bookmark-id="${Utils.escapeHTML(id)}"
+                aria-pressed="${saved ? "true" : "false"}"
+                title="${saved ? "Remove bookmark" : "Save bookmark"}"
+            >
+                <span class="bookmark-icon">
+                    ${saved ? "★" : "☆"}
+                </span>
+                <span class="bookmark-label">
+                    ${saved ? "Saved" : "Save"}
+                </span>
+            </button>
+        `;
+    },
+
+    stat(label, value, suffix = "") {
+
+        return `
+            <div class="stat-block">
+
+                <div class="stat-label">
+                    ${Utils.escapeHTML(label)}
+                </div>
+
+                <div class="stat-value">
+                    ${Utils.escapeHTML(value)}
+                    ${
+                        suffix
+                            ? `<span>${Utils.escapeHTML(suffix)}</span>`
+                            : ""
+                    }
+                </div>
+
+            </div>
+        `;
+    },
+
+    statBar(label, value, max = 100, display = null) {
+
+        const numeric = Number(value);
+
+        const percentage =
+            Number.isFinite(numeric)
+                ? Utils.clamp(
+                    (numeric / max) * 100,
+                    0,
+                    100
+                )
+                : 0;
+
+        return `
+            <div class="stat-bar-row">
+
+                <div class="stat-bar-top">
+                    <span>${Utils.escapeHTML(label)}</span>
+
+                    <strong>
+                        ${Utils.escapeHTML(
+                            display ?? Utils.formatNumber(value)
+                        )}
+                    </strong>
+                </div>
+
+                <div class="stat-bar">
+                    <span
+                        class="stat-bar-fill"
+                        data-stat-width="${percentage}"
+                        style="width:${percentage}%"
+                    ></span>
+                </div>
+
+            </div>
+        `;
+    },
+
+    emptyState(
+        title = "Nothing here yet",
+        description = "Verified data will appear here when available."
+    ) {
+
+        return `
+            <div class="empty-state">
+
+                <div class="empty-state-mark">
+                    —
+                </div>
+
+                <h3>${Utils.escapeHTML(title)}</h3>
+
+                <p>${Utils.escapeHTML(description)}</p>
+
+            </div>
+        `;
+    },
+
+    errorState(message) {
+
+        return `
+            <section class="error-state">
+
+                <div class="error-state-code">
+                    HKS
+                </div>
+
+                <h1>Unable to load</h1>
+
+                <p>${Utils.escapeHTML(message)}</p>
+
+                <button
+                    type="button"
+                    class="button button-primary"
+                    onclick="location.reload()"
+                >
+                    Retry
+                </button>
+
+            </section>
+        `;
+    },
+
+    loading() {
+
+        return `
+            <div class="loading-state">
+
+                <div class="skeleton skeleton-title"></div>
+                <div class="skeleton skeleton-text"></div>
+                <div class="skeleton skeleton-text short"></div>
+
+                <div class="skeleton-grid">
+                    <div class="skeleton skeleton-card"></div>
+                    <div class="skeleton skeleton-card"></div>
+                    <div class="skeleton skeleton-card"></div>
+                </div>
+
+            </div>
+        `;
+    }
+};
+
+
+/* =========================================================
+   15. HERO RENDERING
+   ========================================================= */
+
+const HeroRenderer = {
+
+    card(hero) {
+
+        return `
+            <article
+                class="hero-card"
+                data-hero-card="${Utils.escapeHTML(hero.id)}"
+            >
+
+                <a
+                    href="?page=hero&slug=${encodeURIComponent(hero.slug)}"
+                    data-page="hero"
+                    data-slug="${Utils.escapeHTML(hero.slug)}"
+                    class="hero-card-media"
+                    aria-label="View ${Utils.escapeHTML(hero.name)}"
+                >
+
+                    ${Media.image(
+                        hero.imageUrl,
+                        `${hero.name} artwork`,
+                        "hero-card-image"
+                    )}
+
+                    <div class="hero-card-overlay"></div>
+
+                    <div class="hero-card-role">
+                        ${Render.badge(
+                            Utils.capitalize(hero.role),
+                            "green"
+                        )}
+
+                        ${Render.badge(
+                            Utils.capitalize(hero.lane),
+                            "neutral"
+                        )}
+                    </div>
+
+                    <div class="hero-card-name">
+                        ${Utils.escapeHTML(hero.name)}
+                    </div>
+
+                </a>
+
+                <div class="hero-card-body">
+
+                    <div class="hero-card-meta">
+
+                        <span>
+                            Difficulty
+                        </span>
+
+                        <strong>
+                            ${Utils.escapeHTML(
+                                Utils.capitalize(hero.difficulty)
+                            )}
+                        </strong>
+
+                    </div>
+
+                    <div class="hero-card-actions">
+
+                        <a
+                            href="?page=hero&slug=${encodeURIComponent(hero.slug)}"
+                            data-page="hero"
+                            data-slug="${Utils.escapeHTML(hero.slug)}"
+                            class="text-link"
+                        >
+                            View hero →
+                        </a>
+
+                        ${Render.bookmark(
+                            "hero",
+                            hero.id
+                        )}
+
+                    </div>
+
+                </div>
+
+            </article>
+        `;
+    },
+
+    detail(hero) {
+
+        if (!hero) {
+            return Render.emptyState(
+                "Hero not found",
+                "The requested hero does not exist in the current dataset."
+            );
+        }
+
+        const stats = hero.stats || {};
+
+        const heroBuilds = DATA.builds.filter(
+            build => build.heroId === hero.id
+        );
+
+        return `
+            <div class="hero-detail">
+
+                <section class="hero-detail-header">
+
+                    <div class="hero-detail-art">
+
+                        ${Media.image(
+                            hero.artUrl || hero.imageUrl,
+                            `${hero.name} artwork`,
+                            "hero-detail-image"
+                        )}
+
+                        <div class="hero-detail-art-overlay"></div>
+
+                    </div>
+
+                    <div class="hero-detail-info">
+
+                        <div class="eyebrow">
+                            ${Utils.capitalize(hero.role)}
+                            ·
+                            ${Utils.capitalize(hero.lane)}
+                        </div>
+
+                        <h1>
+                            ${Utils.escapeHTML(hero.name)}
+                        </h1>
+
+                        <p class="hero-bio">
+                            ${Utils.escapeHTML(hero.bio)}
+                        </p>
+
+                        <div class="hero-detail-actions">
+
+                            <button
+                                type="button"
+                                class="button button-primary"
+                                data-page="calculator"
+                                data-calculator-hero="${Utils.escapeHTML(hero.id)}"
+                            >
+                                Try in Calculator
+                            </button>
+
+                            ${Render.bookmark(
+                                "hero",
+                                hero.id
+                            )}
+
+                        </div>
+
+                        <div class="hero-detail-meta">
+
+                            ${Render.badge(
+                                Utils.capitalize(hero.role),
+                                "green"
+                            )}
+
+                            ${Render.badge(
+                                Utils.capitalize(hero.lane),
+                                "neutral"
+                            )}
+
+                            ${Render.badge(
+                                Utils.capitalize(hero.difficulty),
+                                "neutral"
+                            )}
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <section class="content-section">
+
+                    ${Render.sectionHeader(
+                        "Base Stats",
+                        "Verified values for the selected game version."
+                    )}
+
+                    <div class="stat-grid stat-grid-large">
+
+                        ${Render.stat(
+                            "HP",
+                            Utils.formatNumber(stats.hp)
+                        )}
+
+                        ${Render.stat(
+                            "Physical Attack",
+                            Utils.formatNumber(
+                                stats.physicalAttack
+                            )
+                        )}
+
+                        ${Render.stat(
+                            "Magic Attack",
+                            Utils.formatNumber(
+                                stats.magicAttack
+                            )
+                        )}
+
+                        ${Render.stat(
+                            "Physical Defense",
+                            Utils.formatNumber(
+                                stats.physicalDefense
+                            )
+                        )}
+
+                        ${Render.stat(
+                            "Magic Defense",
+                            Utils.formatNumber(
+                                stats.magicDefense
+                            )
+                        )}
+
+                        ${Render.stat(
+                            "Attack Speed",
+                            stats.attackSpeed
+                        )}
+
+                        ${Render.stat(
+                            "Movement Speed",
+                            Utils.formatNumber(
+                                stats.movementSpeed
+                            )
+                        )}
+
+                        ${Render.stat(
+                            "Crit Rate",
+                            Utils.formatPercent(
+                                stats.critRate
+                            )
+                        )}
+
+                    </div>
+
+                </section>
+
+
+                <section class="content-section">
+
+                    ${Render.sectionHeader(
+                        "How to Play",
+                        "A quick practical overview. Deeper strategy belongs in Guides."
+                    )}
+
+                    <div class="skills-grid">
+
+                        ${
+                            hero.skills
+                                .map(skill => `
+                                    <article class="skill-card">
+
+                                        <div class="skill-icon">
+                                            ${Media.icon(
+                                                skill.iconUrl,
+                                                skill.name
+                                            )}
+                                        </div>
+
+                                        <div class="skill-content">
+
+                                            <div class="skill-type">
+                                                ${Utils.escapeHTML(
+                                                    Utils.capitalize(
+                                                        skill.type
+                                                    )
+                                                )}
+                                            </div>
+
+                                            <h3>
+                                                ${Utils.escapeHTML(
+                                                    skill.name
+                                                )}
+                                            </h3>
+
+                                            <p>
+                                                ${Utils.escapeHTML(
+                                                    skill.description
+                                                )}
+                                            </p>
+
+                                        </div>
+
+                                    </article>
+                                `)
+                                .join("")
+                        }
+
+                    </div>
+
+                </section>
+
+
+                <section class="content-section">
+
+                    ${Render.sectionHeader(
+                        "Recommended Builds",
+                        "Builds currently associated with this hero."
+                    )}
+
+                    ${
+                        heroBuilds.length
+                            ? `
+                                <div class="build-grid">
+                                    ${heroBuilds
+                                        .map(BuildRenderer.card)
+                                        .join("")}
+                                </div>
+                            `
+                            : Render.emptyState(
+                                "No verified builds yet",
+                                "Recommended builds will appear when verified."
+                            )
+                    }
+
+                </section>
+
+
+                <section class="content-section">
+
+                    ${Render.sectionHeader(
+                        "Skins",
+                        "Officially verified skin information."
+                    )}
+
+                    ${
+                        hero.skins.length
+                            ? `
+                                <div class="skin-grid">
+                                    ${hero.skins
+                                        .map(skin => `
+                                            <article class="skin-card">
+                                                ${Media.image(
+                                                    skin.imageUrl,
+                                                    skin.name,
+                                                    "skin-image"
+                                                )}
+                                                <div class="skin-body">
+                                                    <h3>
+                                                        ${Utils.escapeHTML(
+                                                            skin.name
+                                                        )}
+                                                    </h3>
+                                                </div>
+                                            </article>
+                                        `)
+                                        .join("")}
+                                </div>
+                            `
+                            : Render.emptyState(
+                                "No verified skin data",
+                                "Skin records will be added from verified sources."
+                            )
+                    }
+
+                </section>
+
+
+                <section class="content-section">
+
+                    ${Render.sectionHeader(
+                        "Patch History",
+                        "Historical changes are preserved rather than overwritten."
+                    )}
+
+                    ${
+                        hero.patchHistory.length
+                            ? `
+                                <div class="timeline">
+                                    ${hero.patchHistory
+                                        .map(change => `
+                                            <article class="timeline-item">
+
+                                                <div class="timeline-marker"></div>
+
+                                                <div class="timeline-content">
+
+                                                    <div class="timeline-meta">
+                                                        ${Utils.escapeHTML(
+                                                            change.version
+                                                        )}
+                                                        ·
+                                                        ${Utils.escapeHTML(
+                                                            change.date
+                                                        )}
+                                                    </div>
+
+                                                    <p>
+                                                        ${Utils.escapeHTML(
+                                                            change.description
+                                                        )}
+                                                    </p>
+
+                                                </div>
+
+                                            </article>
+                                        `)
+                                        .join("")}
+                                </div>
+                            `
+                            : Render.emptyState(
+                                "No patch history",
+                                "Historical changes will appear here when verified."
+                            )
+                    }
+
+                </section>
+
+            </div>
+        `;
+    }
+};
+
+
+/* =========================================================
+   16. EQUIPMENT RENDERING
+   ========================================================= */
+
+const EquipmentRenderer = {
+
+    card(item) {
+
+        return `
+            <article class="equipment-card">
+
+                <a
+                    href="?page=item&slug=${encodeURIComponent(item.slug)}"
+                    data-page="item"
+                    data-slug="${Utils.escapeHTML(item.slug)}"
+                    class="equipment-card-main"
+                >
+
+                    <div class="equipment-icon-large">
+                        ${Media.icon(
+                            item.iconUrl,
+                            item.name
+                        )}
+                    </div>
+
+                    <div class="equipment-card-info">
+
+                        <div class="equipment-card-type">
+                            ${Utils.escapeHTML(
+                                Utils.capitalize(item.type)
+                            )}
+                        </div>
+
+                        <h3>
+                            ${Utils.escapeHTML(item.name)}
+                        </h3>
+
+                        <div class="equipment-price">
+                            ${Utils.formatNumber(item.price)}
+                        </div>
+
+                    </div>
+
+                </a>
+
+                <div class="equipment-stats">
+
+                    ${
+                        Object.entries(item.stats)
+                            .map(([key, value]) => `
+                                <span class="mini-stat">
+                                    ${Utils.escapeHTML(
+                                        Utils.capitalize(
+                                            key.replace(
+                                                /([A-Z])/g,
+                                                " $1"
+                                            )
+                                        )
+                                    )}
+                                    <strong>
+                                        +${Utils.escapeHTML(value)}
+                                    </strong>
+                                </span>
+                            `)
+                            .join("")
+                    }
+
+                </div>
+
+            </article>
+        `;
+    },
+
+    detail(item) {
+
+        if (!item) {
+            return Render.emptyState(
+                "Equipment not found",
+                "The requested equipment does not exist in the current dataset."
+            );
+        }
+
+        const usingBuilds = DATA.builds.filter(
+            build => build.items.includes(item.id)
+        );
+
+        return `
+            <div class="equipment-detail">
+
+                <section class="detail-banner">
+
+                    <div class="detail-banner-icon">
+                        ${Media.icon(
+                            item.iconUrl,
+                            item.name
+                        )}
+                    </div>
+
+                    <div class="detail-banner-copy">
+
+                        <div class="eyebrow">
+                            ${Utils.capitalize(item.type)}
+                        </div>
+
+                        <h1>
+                            ${Utils.escapeHTML(item.name)}
+                        </h1>
+
+                        <p>
+                            ${Utils.escapeHTML(item.description)}
+                        </p>
+
+                    </div>
+
+                    <div class="detail-banner-price">
+
+                        <span>Price</span>
+
+                        <strong>
+                            ${Utils.formatNumber(item.price)}
+                        </strong>
+
+                    </div>
+
+                </section>
+
+
+                <section class="content-section">
+
+                    ${Render.sectionHeader(
+                        "Equipment Stats"
+                    )}
+
+                    <div class="stat-grid">
+
+                        ${
+                            Object.entries(item.stats)
+                                .map(([key, value]) =>
+                                    Render.stat(
+                                        key.replace(
+                                            /([A-Z])/g,
+                                            " $1"
+                                        ),
+                                        value
+                                    )
+                                )
+                                .join("")
+                        }
+
+                    </div>
+
+                </section>
+
+
+                <section class="content-section">
+
+                    ${Render.sectionHeader(
+                        "Passive Effects"
+                    )}
+
+                    <div class="passive-list">
+
+                        ${
+                            item.passives.length
+                                ? item.passives
+                                    .map(passive => `
+                                        <article class="passive-card">
+
+                                            <div class="passive-icon">
+                                                P
+                                            </div>
+
+                                            <div>
+                                                <h3>
+                                                    ${Utils.escapeHTML(
+                                                        passive.name
+                                                    )}
+                                                </h3>
+
+                                                <p>
+                                                    ${Utils.escapeHTML(
+                                                        passive.description
+                                                    )}
+                                                </p>
+                                            </div>
+
+                                        </article>
+                                    `)
+                                    .join("")
+                                : Render.emptyState(
+                                    "No passive data",
+                                    "Verified passive information will appear here."
+                                )
+                        }
+
+                    </div>
+
+                </section>
+
+
+                <section class="content-section">
+
+                    ${Render.sectionHeader(
+                        "Builds Using This Item"
+                    )}
+
+                    ${
+                        usingBuilds.length
+                            ? `
+                                <div class="build-grid">
+                                    ${usingBuilds
+                                        .map(BuildRenderer.card)
+                                        .join("")}
+                                </div>
+                            `
+                            : Render.emptyState(
+                                "No builds currently listed"
+                            )
+                    }
+
+                </section>
+
+            </div>
+        `;
+    }
+};
+
+
+/* =========================================================
+   17. BUILD RENDERING
+   ========================================================= */
+
+const BuildRenderer = {
+
+    itemStrip(itemIds) {
+
+        return `
+            <div class="build-item-strip">
+
+                ${
+                    itemIds
+                        .map(id => {
+
+                            const item =
+                                DATA.equipment.find(
+                                    entry =>
+                                        entry.id === id
+                                );
+
+                            if (!item) {
+                                return `
+                                    <div class="build-item-slot is-empty">
+                                        —
+                                    </div>
+                                `;
+                            }
+
+                            return `
+                                <div
+                                    class="build-item-slot"
+                                    title="${Utils.escapeHTML(item.name)}"
+                                >
+                                    ${Media.icon(
+                                        item.iconUrl,
+                                        item.name
+                                    )}
+                                </div>
+                            `;
+                        })
+                        .join("")
+                }
+
+            </div>
+        `;
+    },
+
+    card(build) {
+
+        const hero = DATA.heroes.find(
+            hero => hero.id === build.heroId
+        );
+
+        return `
+            <article class="build-card">
+
+                <div class="build-card-top">
+
+                    <div class="build-hero-mini">
+
+                        ${
+                            hero
+                                ? Media.image(
+                                    hero.imageUrl,
+                                    hero.name,
+                                    "build-hero-image"
+                                )
+                                : ""
+                        }
+
+                    </div>
+
+                    <div class="build-card-copy">
+
+                        <div class="eyebrow">
+                            ${Utils.escapeHTML(
+                                build.type
+                            )}
+                        </div>
+
+                        <h3>
+                            ${Utils.escapeHTML(
+                                build.name
+                            )}
+                        </h3>
+
+                        <p>
+                            ${Utils.escapeHTML(
+                                build.description
+                            )}
+                        </p>
+
+                    </div>
+
+                </div>
+
+                ${this.itemStrip(build.items)}
+
+                <div class="build-card-bottom">
+
+                    <span class="build-author">
+                        ${Utils.escapeHTML(
+                            build.author
+                        )}
+                    </span>
+
+                    <a
+                        href="?page=build&slug=${encodeURIComponent(build.slug)}"
+                        data-page="build"
+                        data-slug="${Utils.escapeHTML(build.slug)}"
+                        class="text-link"
+                    >
+                        View build →
+                    </a>
+
+                </div>
+
+            </article>
+        `;
+    },
+
+    detail(build) {
+
+        if (!build) {
+            return Render.emptyState(
+                "Build not found",
+                "The requested build does not exist."
+            );
+        }
+
+        const hero = DATA.heroes.find(
+            entry => entry.id === build.heroId
+        );
+
+        const items = build.items.map(
+            id => DATA.equipment.find(
+                item => item.id === id
+            )
+        );
+
+        return `
+            <div class="build-detail">
+
+                <section class="detail-banner build-detail-banner">
+
+                    <div class="detail-banner-copy">
+
+                        <div class="eyebrow">
+                            ${Utils.escapeHTML(
+                                build.type
+                            )}
+                        </div>
+
+                        <h1>
+                            ${Utils.escapeHTML(
+                                build.name
+                            )}
+                        </h1>
+
+                        <p>
+                            ${Utils.escapeHTML(
+                                build.description
+                            )}
+                        </p>
+
+                        <div class="detail-meta-line">
+
+                            ${
+                                hero
+                                    ? `
+                                        <span>
+                                            Hero:
+                                            <strong>
+                                                ${Utils.escapeHTML(
+                                                    hero.name
+                                                )}
+                                            </strong>
+                                        </span>
+                                    `
+                                    : ""
+                            }
+
+                            <span>
+                                Source:
+                                <strong>
+                                    ${Utils.escapeHTML(
+                                        build.source
+                                    )}
+                                </strong>
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <section class="content-section">
+
+                    ${Render.sectionHeader(
+                        "Equipment",
+                        "Six equipment slots used by this build."
+                    )}
+
+                    <div class="build-detail-items">
+
+                        ${
+                            items
+                                .map((item, index) => `
+                                    <article class="build-detail-item">
+
+                                        <div class="build-slot-number">
+                                            ${index + 1}
+                                        </div>
+
+                                        ${
+                                            item
+                                                ? Media.icon(
+                                                    item.iconUrl,
+                                                    item.name,
+                                                    "build-detail-item-icon"
+                                                )
+                                                : `
+                                                    <div class="build-detail-empty">
+                                                        Empty
+                                                    </div>
+                                                `
+                                        }
+
+                                        <h3>
+                                            ${
+                                                item
+                                                    ? Utils.escapeHTML(
+                                                        item.name
+                                                    )
+                                                    : "Empty"
+                                            }
+                                        </h3>
+
+                                    </article>
+                                `)
+                                .join("")
+                        }
+
+                    </div>
+
+                </section>
+
+
+                <section class="content-section">
+
+                    ${Render.sectionHeader(
+                        "Try This Build",
+                        "Send this six-slot setup directly to the calculator."
+                    )}
+
+                    <button
+                        type="button"
+                        class="button button-primary"
+                        data-use-build="${Utils.escapeHTML(
+                            build.id
+                        )}"
+                    >
+                        Open in Calculator
+                    </button>
+
+                </section>
+
+            </div>
+        `;
+    }
+};
+
+
+/* =========================================================
+   18. HOMEPAGE SLIDER
+   ========================================================= */
+
+const Slider = {
+
+    slides: [],
+
+    async load() {
+
+        this.slides = this.generateSlides();
+
+        AppState.slider.index = Utils.clamp(
+            Number(
+                Storage.get(
+                    HOKSTATS_CONFIG.storageKeys.sliderIndex,
+                    0
+                )
+            ),
+            0,
+            Math.max(this.slides.length - 1, 0)
+        );
+
+        this.render();
+
+        if (!AppState.slider.initialized) {
+            this.bind();
+            AppState.slider.initialized = true;
+        }
+
+        this.start();
+    },
+
+    generateSlides() {
+
+        const hero =
+            DATA.heroes.find(
+                item => item.id === "dun"
+            ) ||
+            DATA.heroes[0];
+
+        const build =
+            DATA.builds[0];
+
+        const patch =
+            DATA.patches[0];
+
+        const equipment =
+            DATA.equipment[2];
+
+        const guide =
+            DATA.guides[0];
+
+        const news =
+            DATA.news[0];
+
+        return [
+            {
+                type: "HERO",
+                eyebrow: "Hero Database",
+                title: hero
+                    ? hero.name
+                    : "Heroes",
+                description:
+                    hero
+                        ? hero.bio
+                        : "Explore verified hero data.",
+                cta: "VIEW HERO",
+                page: "hero",
+                slug: hero?.slug,
+                image: hero?.artUrl || hero?.imageUrl || "",
+                accent: "green"
+            },
+
+            {
+                type: "BUILD",
+                eyebrow: "Build Engine",
+                title: build
+                    ? build.name
+                    : "Builds",
+                description:
+                    build
+                        ? build.description
+                        : "Explore verified builds.",
+                cta: "VIEW BUILD",
+                page: "build",
+                slug: build?.slug,
+                image: "",
+                accent: "blue"
+            },
+
+            {
+                type: "PATCH",
+                eyebrow: "Latest Patch",
+                title: patch
+                    ? patch.title
+                    : "Patch Updates",
+                description:
+                    patch
+                        ? patch.summary
+                        : "Track verified patch changes.",
+                cta: "VIEW PATCH",
+                page: "patch",
+                id: patch?.id,
+                image: "",
+                accent: "green"
+            },
+
+            {
+                type: "EQUIPMENT",
+                eyebrow: "Equipment Database",
+                title: equipment
+                    ? equipment.name
+                    : "Equipment",
+                description:
+                    equipment
+                        ? equipment.description
+                        : "Compare equipment.",
+                cta: "VIEW EQUIPMENT",
+                page: "item",
+                slug: equipment?.slug,
+                image: "",
+                accent: "blue"
+            },
+
+            {
+                type: "GUIDE",
+                eyebrow: "Guides",
+                title: guide
+                    ? guide.title
+                    : "Guides",
+                description:
+                    guide
+                        ? guide.summary
+                        : "Learn the game.",
+                cta: "READ GUIDE",
+                page: "guide",
+                slug: guide?.slug,
+                image: "",
+                accent: "green"
+            },
+
+            {
+                type: "NEWS",
+                eyebrow: "News",
+                title: news
+                    ? news.title
+                    : "Latest News",
+                description:
+                    news
+                        ? news.summary
+                        : "Verified Honor of Kings news.",
+                cta: "READ NEWS",
+                page: "news",
+                id: news?.id,
+                image: news?.imageUrl || "",
+                accent: "blue"
+            }
+        ];
+    },
+
+    render() {
+
+        const root =
+            DOM.query("#home-slider");
+
+        if (!root || !this.slides.length) {
+            return;
+        }
+
+        root.innerHTML = `
+            <div class="hero-slider-track">
+
+                ${
+                    this.slides
+                        .map((slide, index) => `
+                            <article
+                                class="home-slide ${index === AppState.slider.index ? "is-active" : ""}"
+                                data-slide-index="${index}"
+                                data-slide-type="${Utils.escapeHTML(slide.type)}"
+                            >
+
+                                <div class="home-slide-media">
+
+                                    ${Media.image(
+                                        slide.image,
+                                        `${slide.title} artwork`,
+                                        "home-slide-image"
+                                    )}
+
+                                </div>
+
+                                <div class="home-slide-overlay"></div>
+
+                                <div class="home-slide-content">
+
+                                    <div class="eyebrow">
+                                        ${Utils.escapeHTML(
+                                            slide.eyebrow
+                                        )}
+                                    </div>
+
+                                    <h1>
+                                        ${Utils.escapeHTML(
+                                            slide.title
+                                        )}
+                                    </h1>
+
+                                    <p>
+                                        ${Utils.escapeHTML(
+                                            slide.description
+                                        )}
+                                    </p>
+
+                                    <button
+                                        type="button"
+                                        class="button button-primary"
+                                        data-slide-action="${index}"
+                                    >
+                                        ${Utils.escapeHTML(
+                                            slide.cta
+                                        )}
+                                    </button>
+
+                                </div>
+
+                                <div class="home-slide-type">
+                                    ${Utils.escapeHTML(
+                                        slide.type
+                                    )}
+                                </div>
+
+                            </article>
+                        `)
+                        .join("")
+                }
+
+            </div>
+
+            <button
+                type="button"
+                class="slider-arrow slider-prev"
+                aria-label="Previous slide"
+                data-slider-prev
+            >
+                ‹
+            </button>
+
+            <button
+                type="button"
+                class="slider-arrow slider-next"
+                aria-label="Next slide"
+                data-slider-next
+            >
+                ›
+            </button>
+
+            <div
+                class="slider-dots"
+                aria-label="Slide navigation"
+            >
+                ${
+                    this.slides
+                        .map((slide, index) => `
+                            <button
+                                type="button"
+                                class="slider-dot ${index === AppState.slider.index ? "is-active" : ""}"
+                                data-slider-dot="${index}"
+                                aria-label="Go to ${Utils.escapeHTML(
+                                    slide.title
+                                )}"
+                            ></button>
+                        `)
+                        .join("")
+                }
+            </div>
+        `;
+    },
+
+    bind() {
+
+        document.addEventListener(
+            "click",
+            event => {
+
+                const next =
+                    event.target.closest(
+                        "[data-slider-next]"
+                    );
+
+                if (next) {
+                    this.next();
+                    return;
+                }
+
+                const previous =
+                    event.target.closest(
+                        "[data-slider-prev]"
+                    );
+
+                if (previous) {
+                    this.previous();
+                    return;
+                }
+
+                const dot =
+                    event.target.closest(
+                        "[data-slider-dot]"
+                    );
+
+                if (dot) {
+                    this.goTo(
+                        Number(
+                            dot.dataset.sliderDot
+                        )
+                    );
+                    return;
+                }
+
+                const action =
+                    event.target.closest(
+                        "[data-slide-action]"
+                    );
+
+                if (action) {
+                    const index = Number(
+                        action.dataset.slideAction
+                    );
+
+                    const slide =
+                        this.slides[index];
+
+                    if (!slide) {
+                        return;
+                    }
+
+                    Navigation.go(
+                        slide.page,
+                        {
+                            slug: slide.slug,
+                            id: slide.id
+                        }
+                    );
+                }
+            }
+        );
+
+        const slider =
+            DOM.query("#home-slider");
+
+        if (!slider) {
+            return;
+        }
+
+        slider.addEventListener(
+            "mouseenter",
+            () => {
+                AppState.slider.paused = true;
+            }
+        );
+
+        slider.addEventListener(
+            "mouseleave",
+            () => {
+                AppState.slider.paused = false;
+            }
+        );
+
+        let touchStartX = null;
+
+        slider.addEventListener(
+            "touchstart",
+            event => {
+                touchStartX =
+                    event.touches[0]?.clientX ?? null;
+            },
+            {
+                passive: true
+            }
+        );
+
+        slider.addEventListener(
+            "touchend",
+            event => {
+
+                if (touchStartX === null) {
+                    return;
+                }
+
+                const touchEndX =
+                    event.changedTouches[0]?.clientX;
+
+                if (touchEndX === undefined) {
+                    return;
+                }
+
+                const delta =
+                    touchStartX - touchEndX;
+
+                if (Math.abs(delta) > 50) {
+
+                    if (delta > 0) {
+                        this.next();
+                    } else {
+                        this.previous();
+                    }
+
+                }
+
+                touchStartX = null;
+            },
+            {
+                passive: true
+            }
+        );
+    },
+
+    goTo(index) {
+
+        if (!this.slides.length) {
+            return;
+        }
+
+        AppState.slider.index =
+            (index + this.slides.length) %
+            this.slides.length;
+
+        Storage.set(
+            HOKSTATS_CONFIG.storageKeys.sliderIndex,
+            AppState.slider.index
+        );
+
+        this.updateDOM();
+    },
+
+    next() {
+        this.goTo(
+            AppState.slider.index + 1
+        );
+    },
+
+    previous() {
+        this.goTo(
+            AppState.slider.index - 1
+        );
+    },
+
+    updateDOM() {
+
+        DOM.queryAll(
+            ".home-slide"
+        ).forEach((slide, index) => {
+
+            slide.classList.toggle(
+                "is-active",
+                index === AppState.slider.index
+            );
+        });
+
+        DOM.queryAll(
+            ".slider-dot"
+        ).forEach((dot, index) => {
+
+            dot.classList.toggle(
+                "is-active",
+                index === AppState.slider.index
+            );
+        });
+    },
+
+    start() {
+
+        this.stop();
+
+        if (
+            Utils.prefersReducedMotion() ||
+            this.slides.length <= 1
+        ) {
+            return;
+        }
+
+        AppState.slider.timer =
+            setInterval(() => {
+
+                if (!AppState.slider.paused) {
+                    this.next();
+                }
+
+            }, HOKSTATS_CONFIG.slider.interval);
+    },
+
+    stop() {
+
+        if (AppState.slider.timer) {
+            clearInterval(
+                AppState.slider.timer
+            );
+
+            AppState.slider.timer = null;
+        }
+    }
+};
+
+
+/* =========================================================
+   19. SEARCH SYSTEM
+   ========================================================= */
+
+const Search = {
+
+    all() {
+
+        const heroes = DATA.heroes.map(item => ({
+            type: "hero",
+            id: item.id,
+            slug: item.slug,
+            title: item.name,
+            description: `${Utils.capitalize(item.role)} · ${Utils.capitalize(item.lane)}`
+        }));
+
+        const equipment = DATA.equipment.map(item => ({
+            type: "equipment",
+            id: item.id,
+            slug: item.slug,
+            title: item.name,
+            description: Utils.capitalize(item.type)
+        }));
+
+        const builds = DATA.builds.map(item => ({
+            type: "build",
+            id: item.id,
+            slug: item.slug,
+            title: item.name,
+            description: "Build"
+        }));
+
+        const guides = DATA.guides.map(item => ({
+            type: "guide",
+            id: item.id,
+            slug: item.slug,
+            title: item.title,
+            description: item.category
+        }));
+
+        const news = DATA.news.map(item => ({
+            type: "news",
+            id: item.id,
+            slug: item.slug,
+            title: item.title,
+            description: item.category
+        }));
+
+        return [
+            ...heroes,
+            ...equipment,
+            ...builds,
+            ...guides,
+            ...news
+        ];
+    },
+
+    query(query) {
+
+        const clean =
+            String(query || "")
+                .trim()
+                .toLowerCase();
+
+        if (!clean) {
+            return [];
+        }
+
+        return this.all()
+            .filter(item => {
+
+                const haystack = [
+                    item.title,
+                    item.description,
+                    item.type
+                ]
+                    .join(" ")
+                    .toLowerCase();
+
+                return haystack.includes(clean);
+            })
+            .slice(
+                0,
+                HOKSTATS_CONFIG.search.maxSuggestions
+            );
+    },
+
+    bindDynamicSearch() {
+
+        const inputs =
+            DOM.queryAll(
+                "[data-global-search], #global-search-input, .global-search-input"
+            );
+
+        inputs.forEach(input => {
+
+            if (input.dataset.searchBound === "true") {
+                return;
+            }
+
+            input.dataset.searchBound = "true";
+
+            input.addEventListener(
+                "input",
+                Utils.debounce(
+                    event => {
+
+                        const query =
+                            event.target.value;
+
+                        AppState.searchQuery =
+                            query;
+
+                        this.showSuggestions(
+                            event.target
+                        );
+
+                    },
+                    120
+                )
+            );
+
+            input.addEventListener(
+                "keydown",
+                event => {
+
+                    if (event.key === "Enter") {
+
+                        event.preventDefault();
+
+                        const query =
+                            event.target.value.trim();
+
+                        if (query) {
+                            Navigation.go(
+                                "search"
+                            );
+
+                            Utils.updateURL({
+                                page: "search",
+                                q: query
+                            });
+                        }
+                    }
+
+                    if (event.key === "Escape") {
+                        this.hideSuggestions();
+                    }
+                }
+            );
+        });
+    },
+
+    showSuggestions(input) {
+
+        const query =
+            input.value.trim();
+
+        let container =
+            input.parentElement?.querySelector(
+                ".search-suggestions"
+            );
+
+        if (!container) {
+
+            container = DOM.create(
+                "div",
+                "search-suggestions"
+            );
+
+            input.parentElement?.appendChild(
+                container
+            );
+        }
+
+        if (
+            query.length <
+            HOKSTATS_CONFIG.search.minCharacters
+        ) {
+            container.innerHTML = "";
+            container.classList.remove("is-open");
+            return;
+        }
+
+        const results =
+            this.query(query);
+
+        if (!results.length) {
+
+            container.innerHTML = `
+                <div class="search-no-results">
+                    No matching data found.
+                </div>
+            `;
+
+            container.classList.add(
+                "is-open"
+            );
+
+            return;
+        }
+
+        container.innerHTML =
+            results
+                .map(item => {
+
+                    let page =
+                        item.type === "hero"
+                            ? "hero"
+                            : item.type === "equipment"
+                                ? "item"
+                                : item.type;
+
+                    return `
+                        <a
+                            href="?page=${encodeURIComponent(page)}&slug=${encodeURIComponent(item.slug)}"
+                            data-page="${Utils.escapeHTML(page)}"
+                            data-slug="${Utils.escapeHTML(item.slug)}"
+                            class="search-suggestion"
+                        >
+
+                            <span class="search-suggestion-icon">
+                                ${Utils.getInitials(
+                                    item.title
+                                )}
+                            </span>
+
+                            <span class="search-suggestion-copy">
+
+                                <strong>
+                                    ${Utils.escapeHTML(
+                                        item.title
+                                    )}
+                                </strong>
+
+                                <small>
+                                    ${Utils.escapeHTML(
+                                        item.description
+                                    )}
+                                </small>
+
+                            </span>
+
+                            <span class="search-suggestion-arrow">
+                                →
+                            </span>
+
+                        </a>
+                    `;
+                })
+                .join("");
+
+        container.classList.add(
+            "is-open"
+        );
+    },
+
+    hideSuggestions() {
+
+        DOM.queryAll(
+            ".search-suggestions"
+        ).forEach(element => {
+            element.classList.remove(
+                "is-open"
+            );
+        });
+    }
+};
+
+
+/* =========================================================
+   20. CALCULATOR ENGINE
+   ========================================================= */
+
+const Calculator = {
+
+    init() {
+
+        const saved =
+            Storage.get(
+                HOKSTATS_CONFIG.storageKeys.calculator,
+                null
+            );
+
+        if (
+            saved &&
+            Array.isArray(saved.slots)
+        ) {
+
+            AppState.calculator =
+                {
+                    heroId:
+                        saved.heroId || null,
+
+                    slots:
+                        Array.from(
+                            {
+                                length:
+                                    HOKSTATS_CONFIG.calculator.slots
+                            },
+                            (_, index) =>
+                                saved.slots[index] ||
+                                null
+                        )
+                };
+        }
+    },
+
+    save() {
+
+        Storage.set(
+            HOKSTATS_CONFIG.storageKeys.calculator,
+            AppState.calculator
+        );
+    },
+
+    reset() {
+
+        AppState.calculator = {
+            heroId: null,
+            slots: Array(
+                HOKSTATS_CONFIG.calculator.slots
+            ).fill(null)
+        };
+
+        this.save();
+
+        Toast.show(
+            "Calculator build reset.",
+            "info"
+        );
+
+        Router.render();
+    },
+
+    setHero(heroId) {
+
+        const hero =
+            DATA.heroes.find(
+                item => item.id === heroId
+            );
+
+        if (!hero) {
+            return;
+        }
+
+        AppState.calculator.heroId =
+            hero.id;
+
+        this.save();
+
+        Router.render();
+    },
+
+    setSlot(slotIndex, itemId) {
+
+        if (
+            slotIndex < 0 ||
+            slotIndex >= HOKSTATS_CONFIG.calculator.slots
+        ) {
+            return;
+        }
+
+        const item =
+            DATA.equipment.find(
+                entry => entry.id === itemId
+            );
+
+        if (!item) {
+            return;
+        }
+
+        AppState.calculator.slots[
+            slotIndex
+        ] = item.id;
+
+        this.save();
+
+        Router.render();
+    },
+
+    removeSlot(slotIndex) {
+
+        if (
+            slotIndex < 0 ||
+            slotIndex >=
+            HOKSTATS_CONFIG.calculator.slots
+        ) {
+            return;
+        }
+
+        AppState.calculator.slots[
+            slotIndex
+        ] = null;
+
+        this.save();
+
+        Router.render();
+    },
+
+    getSelectedItems() {
+
+        return AppState.calculator.slots
+            .map(id =>
+                DATA.equipment.find(
+                    item => item.id === id
+                ) || null
+            );
+    },
+
+    calculate() {
+
+        const hero =
+            DATA.heroes.find(
+                item =>
+                    item.id ===
+                    AppState.calculator.heroId
+            );
+
+        const base = {
+            hp: 0,
+            physicalAttack: 0,
+            magicAttack: 0,
+            physicalDefense: 0,
+            magicDefense: 0,
+            attackSpeed: 0,
+            movementSpeed: 0,
+            critRate: 0,
+            physicalPenetration: 0,
+            magicPenetration: 0,
+            cooldownReduction: 0
+        };
+
+        if (hero) {
+
+            const stats =
+                hero.stats || {};
+
+            base.hp =
+                Number(stats.hp) || 0;
+
+            base.physicalAttack =
+                Number(
+                    stats.physicalAttack
+                ) || 0;
+
+            base.magicAttack =
+                Number(
+                    stats.magicAttack
+                ) || 0;
+
+            base.physicalDefense =
+                Number(
+                    stats.physicalDefense
+                ) || 0;
+
+            base.magicDefense =
+                Number(
+                    stats.magicDefense
+                ) || 0;
+
+            base.attackSpeed =
+                Number(
+                    stats.attackSpeed
+                ) || 0;
+
+            base.movementSpeed =
+                Number(
+                    stats.movementSpeed
+                ) || 0;
+
+            base.critRate =
+                Number(
+                    stats.critRate
+                ) || 0;
+
+            base.physicalPenetration = 0;
+            base.magicPenetration = 0;
+
+            base.cooldownReduction =
+                Number(
+                    stats.cooldownReduction
+                ) || 0;
+        }
+
+        const equipmentTotals = {
+            hp: 0,
+            physicalAttack: 0,
+            magicAttack: 0,
+            physicalDefense: 0,
+            magicDefense: 0,
+            attackSpeed: 0,
+            movementSpeed: 0,
+            critRate: 0,
+            physicalPenetration: 0,
+            magicPenetration: 0,
+            cooldownReduction: 0
+        };
+
+        const selected =
+            this.getSelectedItems();
+
+        selected.forEach(item => {
+
+            if (!item) {
+                return;
+            }
+
+            Object.entries(
+                item.stats || {}
+            ).forEach(([key, value]) => {
+
+                if (
+                    Object.prototype.hasOwnProperty.call(
+                        equipmentTotals,
+                        key
+                    )
+                ) {
+
+                    equipmentTotals[key] +=
+                        Number(value) || 0;
+                }
+            });
+        });
+
+        const final = {};
+
+        Object.keys(base).forEach(key => {
+
+            final[key] =
+                base[key] +
+                equipmentTotals[key];
+        });
+
+        return {
+            hero,
+            base,
+            equipment: equipmentTotals,
+            final
+        };
+    },
+
+    bindDynamic() {
+
+        DOM.queryAll(
+            "[data-calculator-hero]"
+        ).forEach(button => {
+
+            if (button.dataset.calcBound === "true") {
+                return;
+            }
+
+            button.dataset.calcBound = "true";
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const heroId =
+                        button.dataset.calculatorHero;
+
+                    AppState.calculator.heroId =
+                        heroId;
+
+                    this.save();
+
+                    Navigation.go(
+                        "calculator"
+                    );
+                }
+            );
+        });
+
+        DOM.queryAll(
+            "[data-calculator-slot]"
+        ).forEach(slot => {
+
+            if (slot.dataset.calcBound === "true") {
+                return;
+            }
+
+            slot.dataset.calcBound = "true";
+
+            slot.addEventListener(
+                "click",
+                () => {
+
+                    const index =
+                        Number(
+                            slot.dataset.calculatorSlot
+                        );
+
+                    this.openItemSelector(index);
+                }
+            );
+        });
+
+        DOM.queryAll(
+            "[data-calculator-remove]"
+        ).forEach(button => {
+
+            if (button.dataset.calcBound === "true") {
+                return;
+            }
+
+            button.dataset.calcBound = "true";
+
+            button.addEventListener(
+                "click",
+                event => {
+
+                    event.stopPropagation();
+
+                    const index =
+                        Number(
+                            button.dataset.calculatorRemove
+                        );
+
+                    this.removeSlot(index);
+                }
+            );
+        });
+
+        DOM.queryAll(
+            "[data-calculator-reset]"
+        ).forEach(button => {
+
+            if (button.dataset.calcBound === "true") {
+                return;
+            }
+
+            button.dataset.calcBound = "true";
+
+            button.addEventListener(
+                "click",
+                () => this.reset()
+            );
+        });
+
+        DOM.queryAll(
+            "[data-calculator-hero-select]"
+        ).forEach(select => {
+
+            if (select.dataset.calcBound === "true") {
+                return;
+            }
+
+            select.dataset.calcBound = "true";
+
+            select.addEventListener(
+                "change",
+                event => {
+
+                    this.setHero(
+                        event.target.value
+                    );
+                }
+            );
+        });
+    },
+
+    openItemSelector(slotIndex) {
+
+        const content = `
+            <div class="calculator-item-picker">
+
+                <div class="picker-search">
+                    <input
+                        type="search"
+                        class="form-input"
+                        id="calculator-item-search"
+                        placeholder="Search equipment..."
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div
+                    class="calculator-item-picker-grid"
+                    id="calculator-item-results"
+                >
+                    ${this.itemPickerCards(
+                        slotIndex,
+                        DATA.equipment
+                    )}
+                </div>
+
+            </div>
+        `;
+
+        Modal.open(
+            content,
+            {
+                eyebrow: `Slot ${slotIndex + 1}`,
+                title: "Choose Equipment"
+            }
+        );
+
+        const search =
+            DOM.query(
+                "#calculator-item-search"
+            );
+
+        search?.addEventListener(
+            "input",
+            event => {
+
+                const query =
+                    event.target.value
+                        .trim()
+                        .toLowerCase();
+
+                const filtered =
+                    DATA.equipment.filter(
+                        item =>
+                            item.name
+                                .toLowerCase()
+                                .includes(query) ||
+                            item.type
+                                .toLowerCase()
+                                .includes(query)
+                    );
+
+                const results =
+                    DOM.query(
+                        "#calculator-item-results"
+                    );
+
+                if (results) {
+
+                    results.innerHTML =
+                        this.itemPickerCards(
+                            slotIndex,
+                            filtered
+                        );
+                }
+            }
+        );
+
+        DOM.queryAll(
+            "[data-picker-item]"
+        ).forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const itemId =
+                        button.dataset.pickerItem;
+
+                    this.setSlot(
+                        slotIndex,
+                        itemId
+                    );
+
+                    Modal.close();
+                }
+            );
+        });
+    },
+
+    itemPickerCards(slotIndex, items) {
+
+        if (!items.length) {
+            return Render.emptyState(
+                "No equipment found"
+            );
+        }
+
+        return items
+            .map(item => `
+                <button
+                    type="button"
+                    class="calculator-picker-item"
+                    data-picker-item="${Utils.escapeHTML(item.id)}"
+                >
+
+                    <span class="calculator-picker-icon">
+                        ${Media.icon(
+                            item.iconUrl,
+                            item.name
+                        )}
+                    </span>
+
+                    <span class="calculator-picker-copy">
+
+                        <strong>
+                            ${Utils.escapeHTML(
+                                item.name
+                            )}
+                        </strong>
+
+                        <small>
+                            ${Utils.escapeHTML(
+                                Utils.capitalize(
+                                    item.type
+                                )
+                            )}
+                        </small>
+
+                    </span>
+
+                    <span class="calculator-picker-price">
+                        ${Utils.formatNumber(
+                            item.price
+                        )}
+                    </span>
+
+                </button>
+            `)
+            .join("");
+    }
+};
+
+
+/* =========================================================
+   21. PAGE IMPLEMENTATIONS
+   ========================================================= */
+
+const Pages = {
+
+    async home(app) {
+
+        app.innerHTML = `
+
+            <section class="home-page">
+
+                <div
+                    class="home-slider"
+                    id="home-slider"
+                    aria-label="HoKStats featured content"
+                >
+                    ${Render.loading()}
+                </div>
+
+
+                <section class="home-explore content-section">
+
+                    ${Render.sectionHeader(
+                        "Explore HoKStats",
+                        "Browse the database, tools and community."
+                    )}
+
+                    <div class="explore-grid">
+
+                        ${this.exploreButton(
+                            "Heroes",
+                            "Heroes, skills and stats",
+                            "heroes"
+                        )}
+
+                        ${this.exploreButton(
+                            "Equipment",
+                            "Items, stats and passives",
+                            "equipment"
+                        )}
+
+                        ${this.exploreButton(
+                            "Builds",
+                            "Recommended and community builds",
+                            "builds"
+                        )}
+
+                        ${this.exploreButton(
+                            "Calculator",
+                            "Build and compare six equipment slots",
+                            "calculator"
+                        )}
+
+                        ${this.exploreButton(
+                            "Meta",
+                            "Role-based verified statistics",
+                            "meta"
+                        )}
+
+                        ${this.exploreButton(
+                            "Patches",
+                            "Patch history and changes",
+                            "patches"
+                        )}
+
+                        ${this.exploreButton(
+                            "Guides",
+                            "Practical guides and explanations",
+                            "guides"
+                        )}
+
+                        ${this.exploreButton(
+                            "Community",
+                            "Questions and discussions",
+                            "community"
+                        )}
+
+                    </div>
+
+                </section>
+
+
+                <section class="home-search-section">
+
+                    <div class="home-search-panel">
+
+                        <div class="eyebrow">
+                            GLOBAL SEARCH
+                        </div>
+
+                        <h2>
+                            Find anything in HoKStats
+                        </h2>
+
+                        <p>
+                            Search heroes, equipment, builds, guides and news.
+                        </p>
+
+                        <div class="home-search">
+
+                            <span class="home-search-icon">
+                                /
+                            </span>
+
+                            <input
+                                type="search"
+                                class="global-search-input"
+                                data-global-search
+                                placeholder="Search Dun, equipment, builds..."
+                                autocomplete="off"
+                            >
+
+                            <button
+                                type="button"
+                                class="button button-primary"
+                                data-search-submit
+                            >
+                                Search
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <section class="content-section">
+
+                    ${Render.sectionHeader(
+                        "Latest Verified Updates",
+                        "Officially verified information is separated from unconfirmed reports."
+                    )}
+
+                    <div class="news-grid">
+
+                        ${
+                            DATA.news
+                                .filter(
+                                    item =>
+                                        item.category !==
+                                        "RUMOR"
+                                )
+                                .slice(0, 3)
+                                .map(NewsRenderer.card)
+                                .join("")
+                        }
+
+                    </div>
+
+                </section>
+
+
+                <section class="official-widget">
+
+                    <div>
+
+                        <div class="eyebrow">
+                            OFFICIAL DATA
+                        </div>
+
+                        <h2>
+                            Official Patch Notes
+                        </h2>
+
+                        <p>
+                            HoKStats.gg keeps official sources separate from community reports and unconfirmed information.
+                        </p>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        class="button button-secondary"
+                        data-page="patches"
+                    >
+                        View Patches
+                    </button>
+
+                </section>
+
+            </section>
+        `;
+
+        await Slider.load();
+    },
+
+
+    exploreButton(title, description, page) {
+
+        return `
+            <button
+                type="button"
+                class="explore-card"
+                data-page="${Utils.escapeHTML(page)}"
+            >
+
+                <span class="explore-number">
+                    ${String(
+                        [
+                            "heroes",
+                            "equipment",
+                            "builds",
+                            "calculator",
+                            "meta",
+                            "patches",
+                            "guides",
+                            "community"
+                        ].indexOf(page) + 1
+                    ).padStart(2, "0")}
+                </span>
+
+                <span class="explore-copy">
+
+                    <strong>
+                        ${Utils.escapeHTML(title)}
+                    </strong>
+
+                    <small>
+                        ${Utils.escapeHTML(description)}
+                    </small>
+
+                </span>
+
+                <span class="explore-arrow">
+                    →
+                </span>
+
+            </button>
+        `;
+    },
+
+
+    async heroes(app) {
+
+        const heroes =
+            await API.getHeroes();
+
+        let filtered =
+            [...heroes];
+
+        const filter =
+            AppState.heroFilter;
+
+        if (filter.role !== "all") {
+            filtered =
+                filtered.filter(
+                    hero =>
+                        hero.role === filter.role
+                );
+        }
+
+        if (filter.lane !== "all") {
+            filtered =
+                filtered.filter(
+                    hero =>
+                        hero.lane === filter.lane
+                );
+        }
+
+        if (filter.difficulty !== "all") {
+            filtered =
+                filtered.filter(
+                    hero =>
+                        hero.difficulty ===
+                        filter.difficulty
+                );
+        }
+
+        filtered.sort(
+            (a, b) => {
+
+                if (filter.sort === "name") {
+                    return a.name.localeCompare(
+                        b.name
+                    );
+                }
+
+                if (filter.sort === "release") {
+                    return String(
+                        b.releaseDate
+                    ).localeCompare(
+                        String(a.releaseDate)
+                    );
+                }
+
+                return 0;
+            }
+        );
+
+        app.innerHTML = `
+
+            ${Render.pageHeader({
+                eyebrow: "DATABASE",
+                title: "Heroes",
+                description:
+                    "Explore heroes, roles, lanes, abilities and verified base statistics."
+            })}
+
+            <section class="content-section">
+
+                <div class="filter-toolbar">
+
+                    <div class="filter-group">
+
+                        <label>
+                            Role
+                            <select
+                                class="form-select"
+                                data-hero-filter="role"
+                            >
+                                <option value="all">All roles</option>
+                                <option value="fighter">Fighter</option>
+                                <option value="assassin">Assassin</option>
+                                <option value="marksman">Marksman</option>
+                                <option value="mage">Mage</option>
+                                <option value="tank">Tank</option>
+                                <option value="support">Support</option>
+                            </select>
+                        </label>
+
+                        <label>
+                            Lane
+                            <select
+                                class="form-select"
+                                data-hero-filter="lane"
+                            >
+                                <option value="all">All lanes</option>
+                                <option value="clash">Clash</option>
+                                <option value="jungle">Jungle</option>
+                                <option value="mid">Mid</option>
+                                <option value="farm">Farm</option>
+                                <option value="roam">Roam</option>
+                            </select>
+                        </label>
+
+                        <label>
+                            Difficulty
+                            <select
+                                class="form-select"
+                                data-hero-filter="difficulty"
+                            >
+                                <option value="all">All difficulty</option>
+                                <option value="easy">Easy</option>
+                                <option value="medium">Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </label>
+
+                    </div>
+
+                    <label>
+                        Sort
+                        <select
+                            class="form-select"
+                            data-hero-filter="sort"
+                        >
+                            <option value="name">Name</option>
+                            <option value="release">Release</option>
+                        </select>
+                    </label>
+
+                </div>
+
+
+                <div class="hero-grid">
+
+                    ${
+                        filtered.length
+                            ? filtered
+                                .map(
+                                    HeroRenderer.card
+                                )
+                                .join("")
+                            : Render.emptyState(
+                                "No heroes match these filters.",
+                                "Try changing one or more filters."
+                            )
+                    }
+
+                </div>
+
+            </section>
+        `;
+    },
+
+
+    async heroDetail(app) {
+
+        const params =
+            Utils.getQueryParams();
+
+        const slug =
+            params.slug;
+
+        const hero =
+            await API.getHero(slug);
+
+        AppState.currentHero = hero;
+
+        app.innerHTML = HeroRenderer.detail(
+            hero
+        );
+    },
+
+
+    async equipment(app) {
+
+        let items =
+            await API.getEquipment();
+
+        const filter =
+            AppState.equipmentFilter;
+
+        if (filter.type !== "all") {
+
+            items =
+                items.filter(
+                    item =>
+                        item.type === filter.type
+                );
+        }
+
+        if (filter.query) {
+
+            const query =
+                filter.query
+                    .toLowerCase();
+
+            items =
+                items.filter(
+                    item =>
+                        item.name
+                            .toLowerCase()
+                            .includes(query)
+                );
+        }
+
+        items.sort(
+            (a, b) => {
+
+                if (filter.sort === "price") {
+                    return a.price - b.price;
+                }
+
+                return a.name.localeCompare(
+                    b.name
+                );
+            }
+        );
+
+        app.innerHTML = `
+
+            ${Render.pageHeader({
+                eyebrow: "DATABASE",
+                title: "Equipment",
+                description:
+                    "Search equipment, compare attributes and inspect passive effects."
+            })}
+
+            <section class="content-section">
+
+                <div class="filter-toolbar">
+
+                    <label class="filter-search">
+
+                        <span>
+                            Search
+                        </span>
+
+                        <input
+                            type="search"
+                            class="form-input"
+                            data-equipment-search
+                            value="${Utils.escapeHTML(
+                                filter.query
+                            )}"
+                            placeholder="Search equipment..."
+                        >
+
+                    </label>
+
+                    <label>
+                        Type
+                        <select
+                            class="form-select"
+                            data-equipment-filter="type"
+                        >
+                            <option value="all">All types</option>
+                            <option value="attack">Attack</option>
+                            <option value="defense">Defense</option>
+                            <option value="boots">Boots</option>
+                            <option value="crit">Crit</option>
+                            <option value="magic">Magic</option>
+                            <option value="magic-defense">Magic Defense</option>
+                        </select>
+                    </label>
+
+                    <label>
+                        Sort
+                        <select
+                            class="form-select"
+                            data-equipment-filter="sort"
+                        >
+                            <option value="name">Name</option>
+                            <option value="price">Price</option>
+                        </select>
+                    </label>
+
+                </div>
+
+
+                <div class="equipment-grid">
+
+                    ${
+                        items.length
+                            ? items
+                                .map(
+                                    EquipmentRenderer.card
+                                )
+                                .join("")
+                            : Render.emptyState(
+                                "No equipment found.",
+                                "Try another search or filter."
+                            )
+                    }
+
+                </div>
+
+            </section>
+        `;
+    },
+
+
+    async equipmentDetail(app) {
+
+        const params =
+            Utils.getQueryParams();
+
+        const item =
+            await API.getEquipmentItem(
+                params.slug
+            );
+
+        AppState.currentEquipment =
+            item;
+
+        app.innerHTML =
+            EquipmentRenderer.detail(
+                item
+            );
+    },
+
+
+    async builds(app) {
+
+        const builds =
+            await API.getBuilds();
+
+        app.innerHTML = `
+
+            ${Render.pageHeader({
+                eyebrow: "BUILD ENGINE",
+                title: "Builds",
+                description:
+                    "Explore recommended builds and send any setup to the calculator."
+            })}
+
+            <section class="content-section">
+
+                <div class="build-tabs">
+
+                    <button
+                        type="button"
+                        class="tab-button is-active"
+                        data-build-tab="recommended"
+                    >
+                        Recommended
+                    </button>
+
+                    <button
+                        type="button"
+                        class="tab-button"
+                        data-build-tab="community"
+                    >
+                        Community
+                    </button>
+
+                </div>
+
+                <div class="build-grid">
+
+                    ${
+                        builds
+                            .filter(
+                                build =>
+                                    build.type ===
+                                    "recommended"
+                            )
+                            .map(
+                                BuildRenderer.card
+                            )
+                            .join("")
+                    }
+
+                </div>
+
+            </section>
+        `;
+    },
+
+
+    async buildDetail(app) {
+
+        const params =
+            Utils.getQueryParams();
+
+        const build =
+            await API.getBuild(
+                params.slug
+            );
+
+        AppState.currentBuild =
+            build;
+
+        app.innerHTML =
+            BuildRenderer.detail(
+                build
+            );
+    },
+
+
+    async calculator(app) {
+
+        const result =
+            Calculator.calculate();
+
+        const hero =
+            result.hero;
+
+        const selected =
+            Calculator.getSelectedItems();
+
+        app.innerHTML = `
+
+            ${Render.pageHeader({
+                eyebrow: "CALCULATOR",
+                title: "Equipment Calculator",
+                description:
+                    "Choose a hero and six equipment slots to calculate the resulting stat totals."
+            })}
+
+            <section class="calculator-layout">
+
+                <div class="calculator-main">
+
+                    <div class="calculator-toolbar">
+
+                        <label class="calculator-hero-select">
+
+                            <span>
+                                Hero
+                            </span>
+
+                            <select
+                                class="form-select"
+                                data-calculator-hero-select
+                            >
+                                <option value="">
+                                    Select hero
+                                </option>
+
+                                ${
+                                    DATA.heroes
+                                        .map(
+                                            entry => `
+                                                <option
+                                                    value="${Utils.escapeHTML(entry.id)}"
+                                                    ${
+                                                        hero &&
+                                                        hero.id ===
+                                                        entry.id
+                                                            ? "selected"
+                                                            : ""
+                                                    }
+                                                >
+                                                    ${Utils.escapeHTML(
+                                                        entry.name
+                                                    )}
+                                                </option>
+                                            `
+                                        )
+                                        .join("")
+                                }
+
+                            </select>
+
+                        </label>
+
+                        <button
+                            type="button"
+                            class="button button-secondary"
+                            data-calculator-reset
+                        >
+                            Reset Build
+                        </button>
+
+                    </div>
+
+
+                    <div class="calculator-slots">
+
+                        ${
+                            Array.from(
+                                {
+                                    length:
+                                        HOKSTATS_CONFIG.calculator.slots
+                                },
+                                (_, index) => {
+
+                                    const item =
+                                        selected[index];
+
+                                    return `
+                                        <article
+                                            class="calculator-slot ${item ? "has-item" : "is-empty"}"
+                                            data-calculator-slot="${index}"
+                                        >
+
+                                            <div class="calculator-slot-number">
+                                                ${index + 1}
+                                            </div>
+
+                                            <div class="calculator-slot-icon">
+
+                                                ${
+                                                    item
+                                                        ? Media.icon(
+                                                            item.iconUrl,
+                                                            item.name
+                                                        )
+                                                        : `
+                                                            <span class="slot-plus">
+                                                                +
+                                                            </span>
+                                                        `
+                                                }
+
+                                            </div>
+
+                                            <div class="calculator-slot-copy">
+
+                                                <strong>
+                                                    ${
+                                                        item
+                                                            ? Utils.escapeHTML(
+                                                                item.name
+                                                            )
+                                                            : "Empty slot"
+                                                    }
+                                                </strong>
+
+                                                <small>
+                                                    ${
+                                                        item
+                                                            ? Utils.escapeHTML(
+                                                                Utils.capitalize(
+                                                                    item.type
+                                                                )
+                                                            )
+                                                            : "Tap to choose"
+                                                    }
+                                                </small>
+
+                                            </div>
+
+                                            ${
+                                                item
+                                                    ? `
+                                                        <button
+                                                            type="button"
+                                                            class="calculator-slot-remove"
+                                                            data-calculator-remove="${index}"
+                                                            aria-label="Remove ${Utils.escapeHTML(item.name)}"
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    `
+                                                    : ""
+                                            }
+
+                                        </article>
+                                    `;
+                                }
+                            ).join("")
+                        }
+
+                    </div>
+
+
+                    <section class="calculator-stat-section">
+
+                        ${Render.sectionHeader(
+                            "Final Stats",
+                            "Current prototype calculation: Base + Equipment."
+                        )}
+
+                        <div class="stat-grid stat-grid-large">
+
+                            ${Render.stat(
+                                "HP",
+                                Utils.formatNumber(
+                                    result.final.hp
+                                )
+                            )}
+
+                            ${Render.stat(
+                                "Physical Attack",
+                                Utils.formatNumber(
+                                    result.final.physicalAttack
+                                )
+                            )}
+
+                            ${Render.stat(
+                                "Magic Attack",
+                                Utils.formatNumber(
+                                    result.final.magicAttack
+                                )
+                            )}
+
+                            ${Render.stat(
+                                "Physical Defense",
+                                Utils.formatNumber(
+                                    result.final.physicalDefense
+                                )
+                            )}
+
+                            ${Render.stat(
+                                "Magic Defense",
+                                Utils.formatNumber(
+                                    result.final.magicDefense
+                                )
+                            )}
+
+                            ${Render.stat(
+                                "Attack Speed",
+                                result.final.attackSpeed
+                            )}
+
+                            ${Render.stat(
+                                "Movement Speed",
+                                Utils.formatNumber(
+                                    result.final.movementSpeed
+                                )
+                            )}
+
+                            ${Render.stat(
+                                "Crit Rate",
+                                Utils.formatPercent(
+                                    result.final.critRate
+                                )
+                            )}
+
+                            ${Render.stat(
+                                "Physical Pen.",
+                                Utils.formatNumber(
+                                    result.final.physicalPenetration
+                                )
+                            )}
+
+                            ${Render.stat(
+                                "Magic Pen.",
+                                Utils.formatNumber(
+                                    result.final.magicPenetration
+                                )
+                            )}
+
+                            ${Render.stat(
+                                "Cooldown Reduction",
+                                Utils.formatPercent(
+                                    result.final.cooldownReduction
+                                )
+                            )}
+
+                        </div>
+
+                    </section>
+
+                </div>
+
+
+                <aside class="calculator-sidebar">
+
+                    <div class="calculator-breakdown">
+
+                        ${Render.sectionHeader(
+                            "Breakdown"
+                        )}
+
+                        ${
+                            hero
+                                ? `
+                                    <div class="breakdown-row">
+                                        <span>Base</span>
+                                        <strong>
+                                            ${Utils.escapeHTML(
+                                                hero.name
+                                            )}
+                                        </strong>
+                                    </div>
+                                `
+                                : `
+                                    <div class="breakdown-row">
+                                        <span>Base</span>
+                                        <strong>
+                                            Select a hero
+                                        </strong>
+                                    </div>
+                                `
+                        }
+
+                        <div class="breakdown-row">
+                            <span>Equipment</span>
+                            <strong>
+                                ${
+                                    selected.filter(
+                                        Boolean
+                                    ).length
+                                }
+                                / 6
+                            </strong>
+                        </div>
+
+                        <div class="breakdown-divider"></div>
+
+                        <div class="breakdown-note">
+                            Percentage modifiers, hero effects and item passive calculations will be handled by the verified calculator engine once the official mechanics dataset is connected.
+                        </div>
+
+                    </div>
+
+
+                    <div class="calculator-sidebar-card">
+
+                        <div class="eyebrow">
+                            DATABASE STATUS
+                        </div>
+
+                        <h3>
+                            Verification first
+                        </h3>
+
+                        <p>
+                            The calculator should never invent mechanics when verified data is unavailable.
+                        </p>
+
+                    </div>
+
+                </aside>
+
+            </section>
+        `;
+    },
+
+
+    async meta(app) {
+
+        const role =
+            AppState.metaRole;
+
+        const data =
+            await API.getMeta(role);
+
+        app.innerHTML = `
+
+            ${Render.pageHeader({
+                eyebrow: "META",
+                title: "Meta",
+                description:
+                    "Role-based statistics from verified sources. Unavailable values remain unavailable."
+            })}
+
+            <section class="content-section">
+
+                <div class="role-tabs">
+
+                    ${
+                        [
+                            ["overview", "Overview"],
+                            ["clash", "Clash Lane"],
+                            ["jungle", "Jungle"],
+                            ["mid", "Mid Lane"],
+                            ["farm", "Farm Lane"],
+                            ["roam", "Roamer"]
+                        ]
+                            .map(
+                                ([id, label]) => `
+                                    <button
+                                        type="button"
+                                        class="tab-button ${
+                                            role === id
+                                                ? "is-active"
+                                                : ""
+                                        }"
+                                        data-meta-role="${id}"
+                                    >
+                                        ${Utils.escapeHTML(
+                                            label
+                                        )}
+                                    </button>
+                                `
+                            )
+                            .join("")
+                    }
+
+                </div>
+
+
+                ${
+                    data.length
+                        ? `
+                            <div class="data-table-wrap">
+
+                                <table class="data-table">
+
+                                    <thead>
+                                        <tr>
+                                            <th>Hero</th>
+                                            <th>Win Rate</th>
+                                            <th>Pick Rate</th>
+                                            <th>Ban Rate</th>
+                                            <th>Trend</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+
+                                        ${
+                                            data
+                                                .map(
+                                                    row => {
+
+                                                        const hero =
+                                                            DATA.heroes.find(
+                                                                item =>
+                                                                    item.id ===
+                                                                    row.heroId
+                                                            );
+
+                                                        return `
+                                                            <tr>
+
+                                                                <td>
+                                                                    <strong>
+                                                                        ${
+                                                                            hero
+                                                                                ? Utils.escapeHTML(
+                                                                                    hero.name
+                                                                                )
+                                                                                : "Unknown"
+                                                                        }
+                                                                    </strong>
+                                                                </td>
+
+                                                                <td>
+                                                                    ${
+                                                                        row.winRate === null
+                                                                            ? "—"
+                                                                            : Utils.formatPercent(
+                                                                                row.winRate
+                                                                            )
+                                                                    }
+                                                                </td>
+
+                                                                <td>
+                                                                    ${
+                                                                        row.pickRate === null
+                                                                            ? "—"
+                                                                            : Utils.formatPercent(
+                                                                                row.pickRate
+                                                                            )
+                                                                    }
+                                                                </td>
+
+                                                                <td>
+                                                                    ${
+                                                                        row.banRate === null
+                                                                            ? "—"
+                                                                            : Utils.formatPercent(
+                                                                                row.banRate
+                                                                            )
+                                                                    }
+                                                                </td>
+
+                                                                <td>
+                                                                    ${Utils.escapeHTML(
+                                                                        row.trend
+                                                                    )}
+                                                                </td>
+
+                                                            </tr>
+                                                        `;
+                                                    }
+                                                )
+                                                .join("")
+                                        }
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+                        `
+                        : Render.emptyState(
+                            "Meta data unavailable",
+                            "No verified regional meta snapshot is currently available."
+                        )
+                }
+
+            </section>
+        `;
+    },
+
+
+    async patches(app) {
+
+        const patches =
+            await API.getPatches();
+
+        app.innerHTML = `
+
+            ${Render.pageHeader({
+                eyebrow: "PATCH HISTORY",
+                title: "Patches",
+                description:
+                    "Track current and historical game versions without overwriting old records."
+            })}
+
+
+            <section class="content-section">
+
+                <div class="patch-list">
+
+                    ${
+                        patches
+                            .map(
+                                patch => `
+                                    <article class="patch-card">
+
+                                        <div class="patch-version">
+                                            ${Utils.escapeHTML(
+                                                patch.version
+                                            )}
+                                        </div>
+
+                                        <div class="patch-copy">
+
+                                            <div class="patch-meta">
+                                                ${Utils.escapeHTML(
+                                                    patch.date
+                                                )}
+                                                ·
+                                                ${Utils.escapeHTML(
+                                                    patch.season
+                                                )}
+
+                                                ${
+                                                    patch.status ===
+                                                    "current"
+                                                        ? Render.badge(
+                                                            "Current",
+                                                            "green"
+                                                        )
+                                                        : ""
+                                                }
+
+                                            </div>
+
+                                            <h3>
+                                                ${Utils.escapeHTML(
+                                                    patch.title
+                                                )}
+                                            </h3>
+
+                                            <p>
+                                                ${Utils.escapeHTML(
+                                                    patch.summary
+                                                )}
+                                            </p>
+
+                                        </div>
+
+                                        <a
+                                            href="?page=patch&id=${encodeURIComponent(patch.id)}"
+                                            data-page="patch"
+                                            data-id="${Utils.escapeHTML(patch.id)}"
+                                            class="text-link"
+                                        >
+                                            View →
+                                        </a>
+
+                                    </article>
+                                `
+                            )
+                            .join("")
+                    }
+
+                </div>
+
+            </section>
+        `;
+    },
+
+
+    async patchDetail(app) {
+
+        const params =
+            Utils.getQueryParams();
+
+        const patch =
+            DATA.patches.find(
+                item =>
+                    item.id === params.id
+            );
+
+        if (!patch) {
+            app.innerHTML =
+                Render.emptyState(
+                    "Patch not found"
+                );
+            return;
+        }
+
+        app.innerHTML = `
+
+            ${Render.pageHeader({
+                eyebrow: `PATCH ${patch.version}`,
+                title: patch.title,
+                description: patch.summary
+            })}
+
+            <section class="content-section">
+
+                <div class="patch-detail-grid">
+
+                    <article class="patch-detail-section">
+
+                        <h2>
+                            Hero Changes
+                        </h2>
+
+                        ${
+                            patch.heroChanges.length
+                                ? patch.heroChanges
+                                    .map(
+                                        change => `
+                                            <div class="change-row">
+                                                ${Utils.escapeHTML(
+                                                    change.description
+                                                )}
+                                            </div>
+                                        `
+                                    )
+                                    .join("")
+                                : Render.emptyState(
+                                    "No verified hero changes"
+                                )
+                        }
+
+                    </article>
+
+
+                    <article class="patch-detail-section">
+
+                        <h2>
+                            Equipment Changes
+                        </h2>
+
+                        ${
+                            patch.equipmentChanges.length
+                                ? patch.equipmentChanges
+                                    .map(
+                                        change => `
+                                            <div class="change-row">
+                                                ${Utils.escapeHTML(
+                                                    change.description
+                                                )}
+                                            </div>
+                                        `
+                                    )
+                                    .join("")
+                                : Render.emptyState(
+                                    "No verified equipment changes"
+                                )
+                        }
+
+                    </article>
+
+
+                    <article class="patch-detail-section">
+
+                        <h2>
+                            System Changes
+                        </h2>
+
+                        ${
+                            patch.systemChanges.length
+                                ? patch.systemChanges
+                                    .map(
+                                        change => `
+                                            <div class="change-row">
+                                                ${Utils.escapeHTML(
+                                                    change
+                                                )}
+                                            </div>
+                                        `
+                                    )
+                                    .join("")
+                                : Render.emptyState(
+                                    "No verified system changes"
+                                )
+                        }
+
+                    </article>
+
+                </div>
+
+            </section>
+        `;
+    },
+
+
+    async news(app) {
+
+        const news =
+            await API.getNews();
+
+        app.innerHTML = `
+
+            ${Render.pageHeader({
+                eyebrow: "NEWS",
+                title: "News",
+                description:
+                    "Official announcements, upcoming content and clearly labelled unconfirmed reports."
+            })}
+
+            <section class="content-section">
+
+                <div class="news-filter-tabs">
+
+                    <button
+                        type="button"
+                        class="tab-button is-active"
+                        data-news-filter="all"
+                    >
+                        All
+                    </button>
+
+                    <button
+                        type="button"
+                        class="tab-button"
+                        data-news-filter="OFFICIAL"
+                    >
+                        Official
+                    </button>
+
+                    <button
+                        type="button"
+                        class="tab-button"
+                        data-news-filter="COMING_SOON"
+                    >
+                        Coming Soon
+                    </button>
+
+                    <button
+                        type="button"
+                        class="tab-button"
+                        data-news-filter="RUMOR"
+                    >
+                        Leaks & Rumors
+                    </button>
+
+                </div>
+
+
+                <div class="news-grid">
+
+                    ${
+                        news
+                            .map(
+                                NewsRenderer.card
+                            )
+                            .join("")
+                    }
+
+                </div>
+
+            </section>
+        `;
+    },
+
+
+    async guides(app) {
+
+        const guides =
+            await API.getGuides();
+
+        app.innerHTML = `
+
+            ${Render.pageHeader({
+                eyebrow: "GUIDES",
+                title: "Guides",
+                description:
+                    "Practical explanations, beginner resources and deeper hero strategy."
+            })}
+
+            <section class="content-section">
+
+                <div class="guide-grid">
+
+                    ${
+                        guides
+                            .map(
+                                GuideRenderer.card
+                            )
+                            .join("")
+                    }
+
+                </div>
+
+            </section>
+        `;
+    },
+
+
+    async guideDetail(app) {
+
+        const params =
+            Utils.getQueryParams();
+
+        const guide =
+            DATA.guides.find(
+                item =>
+                    item.slug ===
+                    params.slug
+            );
+
+        app.innerHTML =
+            GuideRenderer.detail(
+                guide
+            );
+    },
+
+
+    async community(app) {
+
+        const questions =
+            await API.getQuestions();
+
+        app.innerHTML = `
+
+            ${Render.pageHeader({
+                eyebrow: "COMMUNITY",
+                title: "Community",
+                description:
+                    "Ask questions, share knowledge and discuss the game."
+            })}
+
+            <section class="content-section">
+
+                <div class="community-toolbar">
+
+                    <button
+                        type="button"
+                        class="button button-primary"
+                        data-community-ask
+                    >
+                        Ask a Question
+                    </button>
+
+                    <div class="community-tabs">
+
+                        <button
+                            type="button"
+                            class="tab-button is-active"
+                            data-community-filter="recent"
+                        >
+                            Recent
+                        </button>
+
+                        <button
+                            type="button"
+                            class="tab-button"
+                            data-community-filter="popular"
+                        >
+                            Popular
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="question-list">
+
+                    ${
+                        questions
+                            .map(
+                                QuestionRenderer.card
+                            )
+                            .join("")
+                    }
+
+                </div>
+
+            </section>
+        `;
+    },
+
+
+    async search(app) {
+
+        const params =
+            Utils.getQueryParams();
+
+        const query =
+            params.query ||
+            params.q ||
+            "";
+
+        AppState.searchQuery =
+            query;
+
+        const results =
+            Search.query(query);
+
+        app.innerHTML = `
+
+            ${Render.pageHeader({
+                eyebrow: "SEARCH",
+                title: "Search",
+                description:
+                    query
+                        ? `Results for "${query}"`
+                        : "Search the entire HoKStats database."
+            })}
+
+            <section class="content-section">
+
+                <div class="search-page-box">
+
+                    <input
+                        type="search"
+                        class="form-input"
+                        id="search-page-input"
+                        data-global-search
+                        value="${Utils.escapeHTML(
+                            query
+                        )}"
+                        placeholder="Search heroes, equipment, builds..."
+                    >
+
+                </div>
+
+
+                <div class="search-results">
+
+                    ${
+                        results.length
+                            ? results
+                                .map(
+                                    result => `
+                                        <a
+                                            href="?page=${
+                                                result.type === "hero"
+                                                    ? "hero"
+                                                    : result.type === "equipment"
+                                                        ? "item"
+                                                        : result.type
+                                            }&slug=${encodeURIComponent(result.slug)}"
+                                            data-page="${
+                                                result.type === "hero"
+                                                    ? "hero"
+                                                    : result.type === "equipment"
+                                                        ? "item"
+                                                        : result.type
+                                            }"
+                                            data-slug="${Utils.escapeHTML(result.slug)}"
+                                            class="search-result"
+                                        >
+
+                                            <div class="search-result-icon">
+                                                ${Utils.getInitials(
+                                                    result.title
+                                                )}
+                                            </div>
+
+                                            <div class="search-result-copy">
+
+                                                <div class="eyebrow">
+                                                    ${Utils.escapeHTML(
+                                                        result.type
+                                                    )}
+                                                </div>
+
+                                                <h3>
+                                                    ${Utils.escapeHTML(
+                                                        result.title
+                                                    )}
+                                                </h3>
+
+                                                <p>
+                                                    ${Utils.escapeHTML(
+                                                        result.description
+                                                    )}
+                                                </p>
+
+                                            </div>
+
+                                            <span>
+                                                →
+                                            </span>
+
+                                        </a>
+                                    `
+                                )
+                                .join("")
+                            : Render.emptyState(
+                                query
+                                    ? "No results found"
+                                    : "Start searching",
+                                query
+                                    ? "Try another name or keyword."
+                                    : "Search heroes, equipment, builds, guides and news."
+                            )
+                    }
+
+                </div>
+
+            </section>
+        `;
+    },
+
+
+    async about(app) {
+
+        app.innerHTML = `
+
+            ${Render.pageHeader({
+                eyebrow: "ABOUT",
+                title: "About HoKStats.gg",
+                description:
+                    "A living Honor of Kings database, utility and community hub."
+            })}
+
+            <section class="content-section">
+
+                <div class="prose-layout">
+
+                    <article class="info-panel">
+
+                        <div class="eyebrow">
+                            PURPOSE
+                        </div>
+
+                        <h2>
+                            Information first.
+                        </h2>
+
+                        <p>
+                            HoKStats.gg is designed around verified game information, useful tools and a clean database experience.
+                        </p>
+
+                    </article>
+
+
+                    <article class="info-panel">
+
+                        <div class="eyebrow">
+                            DATA SOURCES
+                        </div>
+
+                        <h2>
+                            Official-first verification
+                        </h2>
+
+                        <p>
+                            Official live data is prioritized. Official announcements and verified historical information are used where appropriate.
+                        </p>
+
+                    </article>
+
+
+                    <article class="info-panel">
+
+                        <div class="eyebrow">
+                            DISCLAIMER
+                        </div>
+
+                        <h2>
+                            Independent project
+                        </h2>
+
+                        <p>
+                            HoKStats.gg is an independent project and is not presented as an official Honor of Kings website.
+                        </p>
+
+                    </article>
+
+                </div>
+
+            </section>
+        `;
+    },
+
+
+    async data(app) {
+
+        app.innerHTML = `
+
+            ${Render.pageHeader({
+                eyebrow: "DATA",
+                title: "Data Status",
+                description:
+                    "Information about dataset versioning, verification and update status."
+            })}
+
+
+            <section class="content-section">
+
+                <div class="data-status-grid">
+
+                    <article class="data-status-card">
+
+                        <span>
+                            Live Data
+                        </span>
+
+                        <strong>
+                            Connected
+                        </strong>
+
+                        <small>
+                            Prototype dataset
+                        </small>
+
+                    </article>
+
+
+                    <article class="data-status-card">
+
+                        <span>
+                            Test Data
+                        </span>
+
+                        <strong>
+                            Separate
+                        </strong>
+
+                        <small>
+                            Never treated as live
+                        </small>
+
+                    </article>
+
+
+                    <article class="data-status-card">
+
+                        <span>
+                            Verification
+                        </span>
+
+                        <strong>
+                            Official-first
+                        </strong>
+
+                        <small>
+                            Unverified values remain unavailable
+                        </small>
+
+                    </article>
+
+
+                    <article class="data-status-card">
+
+                        <span>
+                            Version
+                        </span>
+
+                        <strong>
+                            ${Utils.escapeHTML(
+                                HOKSTATS_CONFIG.version
+                            )}
+                        </strong>
+
+                        <small>
+                            Frontend prototype
+                        </small>
+
+                    </article>
+
+                </div>
+
+
+                <div class="info-panel">
+
+                    <h2>
+                        Update pipeline
+                    </h2>
+
+                    <div class="pipeline">
+
+                        <span>Official Source</span>
+                        <b>→</b>
+                        <span>Collector</span>
+                        <b>→</b>
+                        <span>Change Detection</span>
+                        <b>→</b>
+                        <span>Validation</span>
+                        <b>→</b>
+                        <span>Database</span>
+
+                    </div>
+
+                </div>
+
+            </section>
+        `;
+    },
+
+
+    async admin(app) {
+
+        app.innerHTML = `
+
+            ${Render.pageHeader({
+                eyebrow: "ADMIN",
+                title: "Admin Dashboard",
+                description:
+                    "Administrative controls are intentionally separate from public navigation."
+            })}
+
+
+            <section class="content-section">
+
+                <div class="admin-grid">
+
+                    ${this.adminCard(
+                        "Heroes",
+                        "Manage verified hero data.",
+                        "heroes"
+                    )}
+
+                    ${this.adminCard(
+                        "Equipment",
+                        "Manage equipment and passives.",
+                        "equipment"
+                    )}
+
+                    ${this.adminCard(
+                        "Patches",
+                        "Review patch records.",
+                        "patches"
+                    )}
+
+                    ${this.adminCard(
+                        "News",
+                        "Manage official and community content.",
+                        "news"
+                    )}
+
+                    ${this.adminCard(
+                        "Guides",
+                        "Review guide status.",
+                        "guides"
+                    )}
+
+                    ${this.adminCard(
+                        "Community",
+                        "Moderate questions and reports.",
+                        "community"
+                    )}
+
+                    ${this.adminCard(
+                        "Data Sync",
+                        "Review synchronization jobs.",
+                        "data"
+                    )}
+
+                    ${this.adminCard(
+                        "Logs",
+                        "Review change history and verification.",
+                        "data"
+                    )}
+
+                </div>
+
+            </section>
+        `;
+    },
+
+
+    adminCard(title, description, page) {
+
+        return `
+            <button
+                type="button"
+                class="admin-card"
+                data-page="${Utils.escapeHTML(page)}"
+            >
+
+                <span class="admin-card-mark">
+                    +
+                </span>
+
+                <strong>
+                    ${Utils.escapeHTML(title)}
+                </strong>
+
+                <small>
+                    ${Utils.escapeHTML(description)}
+                </small>
+
+            </button>
+        `;
+    },
+
+
+    async notFound(app) {
+
+        app.innerHTML = `
+
+            <section class="error-state">
+
+                <div class="error-state-code">
+                    404
+                </div>
+
+                <h1>
+                    Page not found
+                </h1>
+
+                <p>
+                    The requested HoKStats page does not exist.
+                </p>
+
+                <button
+                    type="button"
+                    class="button button-primary"
+                    data-page="home"
+                >
+                    Back Home
+                </button>
+
+            </section>
+        `;
+    }
+};
+
+
+/* =========================================================
+   22. NEWS RENDERER
+   ========================================================= */
+
+const NewsRenderer = {
+
+    card(item) {
+
+        const categoryClass =
+            item.category === "RUMOR"
+                ? "warning"
+                : item.category === "OFFICIAL"
+                    ? "green"
+                    : "neutral";
+
+        return `
+            <article class="news-card">
+
+                <a
+                    href="?page=news&slug=${encodeURIComponent(item.slug)}"
+                    data-page="news"
+                    data-slug="${Utils.escapeHTML(item.slug)}"
+                    class="news-media"
+                >
+
+                    ${Media.image(
+                        item.imageUrl,
+                        item.title,
+                        "news-image"
+                    )}
+
+                    <div class="news-media-overlay"></div>
+
+                    <div class="news-category">
+                        ${Render.badge(
+                            item.category === "RUMOR"
+                                ? "UNCONFIRMED"
+                                : item.category,
+                            categoryClass
+                        )}
+                    </div>
+
+                </a>
+
+                <div class="news-card-body">
+
+                    <div class="news-date">
+                        ${Utils.escapeHTML(
+                            item.date
+                        )}
+                    </div>
+
+                    <h3>
+                        ${Utils.escapeHTML(
+                            item.title
+                        )}
+                    </h3>
+
+                    <p>
+                        ${Utils.escapeHTML(
+                            item.summary
+                        )}
+                    </p>
+
+                    <a
+                        href="?page=news&slug=${encodeURIComponent(item.slug)}"
+                        data-page="news"
+                        data-slug="${Utils.escapeHTML(item.slug)}"
+                        class="text-link"
+                    >
+                        Read more →
+                    </a>
+
+                </div>
+
+            </article>
+        `;
+    }
+};
+
+
+/* =========================================================
+   23. GUIDE RENDERER
+   ========================================================= */
+
+const GuideRenderer = {
+
+    card(guide) {
+
+        return `
+            <article class="guide-card">
+
+                <div class="guide-media">
+
+                    ${Media.image(
+                        guide.imageUrl,
+                        guide.title,
+                        "guide-image"
+                    )}
+
+                    <div class="guide-category">
+                        ${Render.badge(
+                            guide.category,
+                            "green"
+                        )}
+                    </div>
+
+                </div>
+
+                <div class="guide-card-body">
+
+                    <div class="guide-meta">
+                        ${Utils.escapeHTML(
+                            guide.patchVersion
+                        )}
+                        ·
+                        ${Utils.escapeHTML(
+                            guide.author
+                        )}
+                    </div>
+
+                    <h3>
+                        ${Utils.escapeHTML(
+                            guide.title
+                        )}
+                    </h3>
+
+                    <p>
+                        ${Utils.escapeHTML(
+                            guide.summary
+                        )}
+                    </p>
+
+                    <a
+                        href="?page=guide&slug=${encodeURIComponent(guide.slug)}"
+                        data-page="guide"
+                        data-slug="${Utils.escapeHTML(guide.slug)}"
+                        class="text-link"
+                    >
+                        Read guide →
+                    </a>
+
+                </div>
+
+            </article>
+        `;
+    },
+
+    detail(guide) {
+
+        if (!guide) {
+            return Render.emptyState(
+                "Guide not found"
+            );
+        }
+
+        return `
+            ${Render.pageHeader({
+                eyebrow: guide.category,
+                title: guide.title,
+                description: guide.summary
+            })}
+
+            <section class="content-section">
+
+                <div class="guide-detail-layout">
+
+                    <article class="guide-content">
+
+                        ${Media.image(
+                            guide.imageUrl,
+                            guide.title,
+                            "guide-detail-image"
+                        )}
+
+                        <div class="prose-content">
+
+                            <p>
+                                ${Utils.escapeHTML(
+                                    guide.content
+                                )}
+                            </p>
+
+                        </div>
+
+                    </article>
+
+
+                    <aside class="guide-sidebar">
+
+                        <div class="sidebar-panel">
+
+                            <div class="eyebrow">
+                                GUIDE INFO
+                            </div>
+
+                            <div class="sidebar-row">
+                                <span>Category</span>
+                                <strong>
+                                    ${Utils.escapeHTML(
+                                        guide.category
+                                    )}
+                                </strong>
+                            </div>
+
+                            <div class="sidebar-row">
+                                <span>Patch</span>
+                                <strong>
+                                    ${Utils.escapeHTML(
+                                        guide.patchVersion
+                                    )}
+                                </strong>
+                            </div>
+
+                            <div class="sidebar-row">
+                                <span>Author</span>
+                                <strong>
+                                    ${Utils.escapeHTML(
+                                        guide.author
+                                    )}
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </aside>
+
+                </div>
+
+            </section>
+        `;
+    }
+};
+
+
+/* =========================================================
+   24. COMMUNITY QUESTION RENDERER
+   ========================================================= */
+
+const QuestionRenderer = {
+
+    card(question) {
+
+        return `
+            <article class="question-card">
+
+                <div class="question-votes">
+
+                    <strong>
+                        ${Utils.formatNumber(
+                            question.votes
+                        )}
+                    </strong>
+
+                    <span>
+                        votes
+                    </span>
+
+                </div>
+
+                <div class="question-main">
+
+                    <div class="question-meta">
+
+                        ${Render.badge(
+                            question.category,
+                            "neutral"
+                        )}
+
+                        <span>
+                            ${Utils.escapeHTML(
+                                question.date
+                            )}
+                        </span>
+
+                    </div>
+
+                    <h3>
+                        ${Utils.escapeHTML(
+                            question.title
+                        )}
+                    </h3>
+
+                    <p>
+                        ${Utils.escapeHTML(
+                            question.content
+                        )}
+                    </p>
+
+                    <div class="question-bottom">
+
+                        <span>
+                            ${Utils.escapeHTML(
+                                question.author
+                            )}
+                        </span>
+
+                        <strong>
+                            ${Utils.formatNumber(
+                                question.answers
+                            )}
+                            answers
+                        </strong>
+
+                    </div>
+
+                </div>
+
+                <span class="question-arrow">
+                    →
+                </span>
+
+            </article>
+        `;
+    }
+};
+
+
+/* =========================================================
+   25. APP UI EVENTS
+   ========================================================= */
+
+const AppUI = {
+
+    init() {
+
+        document.addEventListener(
+            "click",
+            event => {
+
+                const menuButton =
+                    event.target.closest(
+                        ".mobile-menu-toggle, [data-mobile-menu-toggle]"
+                    );
+
+                if (menuButton) {
+                    Navigation.toggleMobileMenu();
+                    return;
+                }
+
+
+                const bookmark =
+                    event.target.closest(
+                        "[data-bookmark-type]"
+                    );
+
+                if (bookmark) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    Bookmarks.toggle(
+                        bookmark.dataset.bookmarkType,
+                        bookmark.dataset.bookmarkId
+                    );
+
+                    return;
+                }
+
+
+                const searchButton =
+                    event.target.closest(
+                        "[data-search-submit]"
+                    );
+
+                if (searchButton) {
+
+                    const input =
+                        DOM.query(
+                            "[data-global-search]"
+                        );
+
+                    const query =
+                        input?.value.trim();
+
+                    if (query) {
+
+                        Utils.updateURL({
+                            page: "search",
+                            q: query
+                        });
+
+                        Navigation.go(
+                            "search"
+                        );
+                    }
+
+                    return;
+                }
+
+
+                const heroFilter =
+                    event.target.closest(
+                        "[data-hero-filter]"
+                    );
+
+                if (heroFilter) {
+                    return;
+                }
+
+
+                const metaRole =
+                    event.target.closest(
+                        "[data-meta-role]"
+                    );
+
+                if (metaRole) {
+
+                    AppState.metaRole =
+                        metaRole.dataset.metaRole;
+
+                    Router.render();
+
+                    return;
+                }
+
+
+                const buildTab =
+                    event.target.closest(
+                        "[data-build-tab]"
+                    );
+
+                if (buildTab) {
+
+                    const tab =
+                        buildTab.dataset.buildTab;
+
+                    if (tab === "recommended") {
+
+                        Router.render();
+
+                    } else {
+
+                        Toast.show(
+                            "Community builds will be connected to user accounts.",
+                            "info"
+                        );
+                    }
+
+                    return;
+                }
+
+
+                const communityFilter =
+                    event.target.closest(
+                        "[data-community-filter]"
+                    );
+
+                if (communityFilter) {
+
+                    AppState.communityFilter =
+                        communityFilter.dataset.communityFilter;
+
+                    Router.render();
+
+                    return;
+                }
+
+
+                const ask =
+                    event.target.closest(
+                        "[data-community-ask]"
+                    );
+
+                if (ask) {
+
+                    this.openQuestionModal();
+
+                    return;
+                }
+
+
+                const useBuild =
+                    event.target.closest(
+                        "[data-use-build]"
+                    );
+
+                if (useBuild) {
+
+                    const build =
+                        DATA.builds.find(
+                            item =>
+                                item.id ===
+                                useBuild.dataset.useBuild
+                        );
+
+                    if (!build) {
+                        return;
+                    }
+
+                    AppState.calculator = {
+                        heroId: build.heroId,
+                        slots: [
+                            ...build.items,
+                            null,
+                            null
+                        ].slice(0, 6)
+                    };
+
+                    Calculator.save();
+
+                    Navigation.go(
+                        "calculator"
+                    );
+
+                    return;
+                }
+
+
+                const equipmentFilter =
+                    event.target.closest(
+                        "[data-equipment-filter]"
+                    );
+
+                if (equipmentFilter) {
+                    return;
+                }
+
+
+                const newsFilter =
+                    event.target.closest(
+                        "[data-news-filter]"
+                    );
+
+                if (newsFilter) {
+
+                    const category =
+                        newsFilter.dataset.newsFilter;
+
+                    DOM.queryAll(
+                        ".news-card"
+                    ).forEach(card => {
+
+                        if (category === "all") {
+                            card.hidden = false;
+                            return;
+                        }
+
+                        const badge =
+                            card.querySelector(
+                                ".news-category"
+                            );
+
+                        const text =
+                            badge?.textContent
+                                ?.trim()
+                                .toUpperCase();
+
+                        card.hidden =
+                            !text?.includes(
+                                category === "RUMOR"
+                                    ? "UNCONFIRMED"
+                                    : category
+                            );
+                    });
+
+                    DOM.queryAll(
+                        "[data-news-filter]"
+                    ).forEach(button => {
+
+                        button.classList.toggle(
+                            "is-active",
+                            button === newsFilter
+                        );
+                    });
+
+                    return;
+                }
+
+            }
+        );
+
+
+        document.addEventListener(
+            "change",
+            event => {
+
+                const heroFilter =
+                    event.target.closest(
+                        "[data-hero-filter]"
+                    );
+
+                if (heroFilter) {
+
+                    AppState.heroFilter[
+                        heroFilter.dataset.heroFilter
+                    ] =
+                        heroFilter.value;
+
+                    Router.render();
+
+                    return;
+                }
+
+
+                const equipmentFilter =
+                    event.target.closest(
+                        "[data-equipment-filter]"
+                    );
+
+                if (equipmentFilter) {
+
+                    AppState.equipmentFilter[
+                        equipmentFilter.dataset.equipmentFilter
+                    ] =
+                        equipmentFilter.value;
+
+                    Router.render();
+
+                    return;
+                }
+
+
+                const equipmentSearch =
+                    event.target.closest(
+                        "[data-equipment-search]"
+                    );
+
+                if (equipmentSearch) {
+
+                    AppState.equipmentFilter.query =
+                        equipmentSearch.value;
+
+                    Router.render();
+                }
+            }
+        );
+
+
+        const equipmentSearchInput =
+            document.querySelector(
+                "[data-equipment-search]"
+            );
+
+        if (equipmentSearchInput) {
+
+            equipmentSearchInput.addEventListener(
+                "input",
+                Utils.debounce(
+                    event => {
+
+                        AppState.equipmentFilter.query =
+                            event.target.value;
+
+                        Router.render();
+
+                    },
+                    200
+                )
+            );
+        }
+    },
+
+
+    bindDynamicActions() {
+
+        const equipmentSearchInput =
+            DOM.query(
+                "[data-equipment-search]"
+            );
+
+        if (
+            equipmentSearchInput &&
+            equipmentSearchInput.dataset.bound !== "true"
+        ) {
+
+            equipmentSearchInput.dataset.bound =
+                "true";
+
+            equipmentSearchInput.addEventListener(
+                "input",
+                Utils.debounce(
+                    event => {
+
+                        AppState.equipmentFilter.query =
+                            event.target.value;
+
+                        Router.render();
+
+                    },
+                    220
+                )
+            );
+        }
+
+
+        DOM.queryAll(
+            "[data-meta-role]"
+        ).forEach(button => {
+
+            button.classList.toggle(
+                "is-active",
+                button.dataset.metaRole ===
+                AppState.metaRole
+            );
+        });
+    },
+
+
+    refreshActiveNavigation() {
+
+        DOM.queryAll(
+            "[data-page]"
+        ).forEach(link => {
+
+            const target =
+                link.dataset.page;
+
+            link.classList.toggle(
+                "is-active",
+                target === AppState.page ||
+                (
+                    target === "heroes" &&
+                    AppState.page === "hero"
+                ) ||
+                (
+                    target === "equipment" &&
+                    AppState.page === "item"
+                ) ||
+                (
+                    target === "builds" &&
+                    AppState.page === "build"
+                ) ||
+                (
+                    target === "patches" &&
+                    AppState.page === "patch"
+                ) ||
+                (
+                    target === "guides" &&
+                    AppState.page === "guide"
+                )
+            );
+        });
+    },
+
+
+    openQuestionModal() {
+
+        Modal.open(
+            `
+                <form
+                    id="question-form"
+                    class="question-form"
+                >
+
+                    <label>
+                        Title
+                        <input
+                            type="text"
+                            class="form-input"
+                            name="title"
+                            required
+                            maxlength="160"
+                            placeholder="What do you want to ask?"
+                        >
+                    </label>
+
+                    <label>
+                        Category
+                        <select
+                            class="form-select"
+                            name="category"
+                        >
+                            <option value="GENERAL">
+                                General
+                            </option>
+
+                            <option value="HERO">
+                                Heroes
+                            </option>
+
+                            <option value="EQUIPMENT">
+                                Equipment
+                            </option>
+
+                            <option value="CALCULATOR">
+                                Calculator
+                            </option>
+
+                            <option value="DATA">
+                                Data
+                            </option>
+                        </select>
+                    </label>
+
+                    <label>
+                        Question
+                        <textarea
+                            class="form-textarea"
+                            name="content"
+                            required
+                            maxlength="5000"
+                            rows="6"
+                            placeholder="Explain your question..."
+                        ></textarea>
+                    </label>
+
+                    <div class="modal-actions">
+
+                        <button
+                            type="button"
+                            class="button button-secondary"
+                            data-modal-close
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            type="submit"
+                            class="button button-primary"
+                        >
+                            Post Question
+                        </button>
+
+                    </div>
+
+                </form>
+            `,
+            {
+                eyebrow: "COMMUNITY",
+                title: "Ask a Question"
+            }
+        );
+
+        const form =
+            DOM.query(
+                "#question-form"
+            );
+
+        form?.addEventListener(
+            "submit",
+            event => {
+
+                event.preventDefault();
+
+                const data =
+                    new FormData(form);
+
+                const title =
+                    String(
+                        data.get("title") || ""
+                    ).trim();
+
+                const content =
+                    String(
+                        data.get("content") || ""
+                    ).trim();
+
+                if (!title || !content) {
+
+                    Toast.show(
+                        "Please complete the question.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+                Toast.show(
+                    "Question saved locally for this prototype.",
+                    "success"
+                );
+
+                Modal.close();
+            }
+        );
+
+        DOM.queryAll(
+            "[data-modal-close]"
+        ).forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => Modal.close()
+            );
+        });
+    }
+};
+
+
+/* =========================================================
+   26. LANGUAGE PLACEHOLDER SYSTEM
+   =========================================================
+
+   Real i18n should eventually come from translation data.
+
+   Entity IDs stay shared between languages.
+   ========================================================= */
+
+const I18N = {
+
+    dictionaries: {
+
+        en: {
+            home: "Home",
+            heroes: "Heroes",
+            equipment: "Equipment",
+            builds: "Builds",
+            calculator: "Calculator",
+            meta: "Meta",
+            patches: "Patches",
+            guides: "Guides",
+            community: "Community",
+            search: "Search"
+        },
+
+        vi: {
+            home: "Trang chủ",
+            heroes: "Tướng",
+            equipment: "Trang bị",
+            builds: "Build",
+            calculator: "Máy tính",
+            meta: "Meta",
+            patches: "Bản cập nhật",
+            guides: "Hướng dẫn",
+            community: "Cộng đồng",
+            search: "Tìm kiếm"
+        }
+    },
+
+    t(key) {
+
+        const language =
+            AppState.language;
+
+        return (
+            this.dictionaries[
+                language
+            ]?.[key] ||
+            this.dictionaries.en[key] ||
+            key
+        );
+    },
+
+    setLanguage(language) {
+
+        if (
+            !HOKSTATS_CONFIG.supportedLanguages
+                .includes(language)
+        ) {
+            return;
+        }
+
+        AppState.language =
+            language;
+
+        Storage.set(
+            HOKSTATS_CONFIG.storageKeys.language,
+            language
+        );
+
+        Router.render();
+    }
+};
+
+
+/* =========================================================
+   27. GLOBAL KEYBOARD SHORTCUTS
+   ========================================================= */
+
+const Keyboard = {
+
+    init() {
+
+        document.addEventListener(
+            "keydown",
+            event => {
+
+                const target =
+                    event.target;
+
+                const editing =
+                    target &&
+                    (
+                        target.matches(
+                            "input, textarea, select"
+                        ) ||
+                        target.isContentEditable
+                    );
+
+                if (editing) {
+                    return;
+                }
+
+
+                /*
+                 * "/" focuses global search.
+                 */
+                if (event.key === "/") {
+
+                    event.preventDefault();
+
+                    const input =
+                        DOM.query(
+                            "[data-global-search]"
+                        );
+
+                    if (input) {
+                        input.focus();
+                    }
+
+                    return;
+                }
+
+
+                /*
+                 * Escape closes search suggestions.
+                 */
+                if (event.key === "Escape") {
+                    Search.hideSuggestions();
+                }
+
+            }
+        );
+    }
+};
+
+
+/* =========================================================
+   28. SEARCH OUTSIDE CLICK
+   ========================================================= */
+
+const SearchOutsideClick = {
+
+    init() {
+
+        document.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    !event.target.closest(
+                        ".home-search, .global-search, .search-box, .search-suggestions"
+                    )
+                ) {
+                    Search.hideSuggestions();
+                }
+
+            }
+        );
+    }
+};
+
+
+/* =========================================================
+   29. IMAGE FALLBACK HANDLER
+   ========================================================= */
+
+const ImageFallbacks = {
+
+    init() {
+
+        document.addEventListener(
+            "error",
+            event => {
+
+                const image =
+                    event.target;
+
+                if (
+                    image.tagName !== "IMG"
+                ) {
+                    return;
+                }
+
+                if (
+                    image.dataset.fallbackApplied ===
+                    "true"
+                ) {
+                    return;
+                }
+
+                image.dataset.fallbackApplied =
+                    "true";
+
+                image.style.display =
+                    "none";
+
+                const parent =
+                    image.parentElement;
+
+                if (!parent) {
+                    return;
+                }
+
+                parent.classList.add(
+                    "has-image-fallback"
+                );
+
+                if (
+                    !parent.querySelector(
+                        ".media-placeholder"
+                    )
+                ) {
+
+                    const fallback =
+                        DOM.create(
+                            "div",
+                            "media-placeholder"
+                        );
+
+                    fallback.innerHTML = `
+                        <div class="media-placeholder-grid"></div>
+                        <div class="media-placeholder-mark">
+                            <span>HoK</span>
+                            <small>ARTWORK</small>
+                        </div>
+                    `;
+
+                    parent.appendChild(
+                        fallback
+                    );
+                }
+            },
+            true
+        );
+    }
+};
+
+
+/* =========================================================
+   30. INTERSECTION OBSERVER
+   ========================================================= */
+
+const RevealAnimations = {
+
+    init() {
+
+        if (
+            Utils.prefersReducedMotion()
+        ) {
+            return;
+        }
+
+        if (
+            !("IntersectionObserver" in window)
+        ) {
+            return;
+        }
+
+        const observer =
+            new IntersectionObserver(
+                entries => {
+
+                    entries.forEach(
+                        entry => {
+
+                            if (
+                                entry.isIntersecting
+                            ) {
+
+                                entry.target.classList.add(
+                                    "is-visible"
+                                );
+
+                                observer.unobserve(
+                                    entry.target
+                                );
+                            }
+
+                        }
+                    );
+
+                },
+                {
+                    threshold: 0.08
+                }
+            );
+
+        this.observe(
+            observer
+        );
+    },
+
+    observe(observer) {
+
+        DOM.queryAll(
+            ".hero-card, .equipment-card, .build-card, .news-card, .guide-card, .question-card, .info-panel, .stat-block"
+        ).forEach(
+            element => {
+
+                if (
+                    element.dataset.revealBound ===
+                    "true"
+                ) {
+                    return;
+                }
+
+                element.dataset.revealBound =
+                    "true";
+
+                element.classList.add(
+                    "reveal-on-scroll"
+                );
+
+                observer.observe(
+                    element
+                );
+            }
+        );
+    }
+};
+
+
+/* =========================================================
+   31. PAGE VISIBILITY
+   ========================================================= */
+
+const PageVisibility = {
+
+    init() {
+
+        document.addEventListener(
+            "visibilitychange",
+            () => {
+
+                if (
+                    document.hidden
+                ) {
+                    Slider.stop();
+                } else if (
+                    AppState.page ===
+                    "home"
+                ) {
+                    Slider.start();
+                }
+
+            }
+        );
+    }
+};
+
+
+/* =========================================================
+   32. MOBILE SWIPE NAVIGATION
+   ========================================================= */
+
+const MobileNavigation = {
+
+    init() {
+
+        let startX = null;
+        let startY = null;
+
+        document.addEventListener(
+            "touchstart",
+            event => {
+
+                if (
+                    AppState.page !==
+                    "home"
+                ) {
+                    return;
+                }
+
+                startX =
+                    event.touches[0]?.clientX;
+
+                startY =
+                    event.touches[0]?.clientY;
+
+            },
+            {
+                passive: true
+            }
+        );
+
+        document.addEventListener(
+            "touchend",
+            event => {
+
+                if (
+                    startX === null ||
+                    startY === null
+                ) {
+                    return;
+                }
+
+                const endX =
+                    event.changedTouches[0]?.clientX;
+
+                const endY =
+                    event.changedTouches[0]?.clientY;
+
+                if (
+                    endX === undefined ||
+                    endY === undefined
+                ) {
+                    return;
+                }
+
+                const deltaX =
+                    endX - startX;
+
+                const deltaY =
+                    endY - startY;
+
+                if (
+                    Math.abs(deltaX) >
+                    70 &&
+                    Math.abs(deltaX) >
+                    Math.abs(deltaY)
+                ) {
+
+                    if (
+                        deltaX < 0
+                    ) {
+                        Slider.next();
+                    } else {
+                        Slider.previous();
+                    }
+                }
+
+                startX = null;
+                startY = null;
+
+            },
+            {
+                passive: true
+            }
+        );
+    }
+};
+
+
+/* =========================================================
+   33. DATA HEALTH CHECK
+   ========================================================= */
+
+const DataHealth = {
+
+    run() {
+
+        const report = {
+            heroes: DATA.heroes.length,
+            equipment: DATA.equipment.length,
+            builds: DATA.builds.length,
+            patches: DATA.patches.length,
+            news: DATA.news.length,
+            guides: DATA.guides.length,
+            questions:
+                DATA.community.questions.length,
+            brokenBuildItems: 0,
+            brokenBuildHeroes: 0
+        };
+
+
+        DATA.builds.forEach(
+            build => {
+
+                if (
+                    !DATA.heroes.some(
+                        hero =>
+                            hero.id ===
+                            build.heroId
+                    )
+                ) {
+                    report.brokenBuildHeroes++;
+                }
+
+                build.items.forEach(
+                    itemId => {
+
+                        if (
+                            !DATA.equipment.some(
+                                item =>
+                                    item.id ===
+                                    itemId
+                            )
+                        ) {
+                            report.brokenBuildItems++;
+                        }
+                    }
+                );
+            }
+        );
+
+
+        if (
+            report.brokenBuildItems > 0 ||
+            report.brokenBuildHeroes > 0
+        ) {
+
+            console.warn(
+                "[HoKStats] Data health warning:",
+                report
+            );
+        }
+
+        return report;
+    }
+};
+
+
+/* =========================================================
+   34. ADMIN-READY DATA EVENTS
+   ========================================================= */
+
+const DataEvents = {
+
+    emit(name, payload = {}) {
+
+        window.dispatchEvent(
+            new CustomEvent(
+                `hokstats:${name}`,
+                {
+                    detail: payload
+                }
+            )
+        );
+    },
+
+    on(name, callback) {
+
+        window.addEventListener(
+            `hokstats:${name}`,
+            callback
+        );
+    }
+};
+
+
+/* =========================================================
+   35. APP INITIALIZATION
+   ========================================================= */
+
+const App = {
+
+    async init() {
+
+        console.log(
+            `%cHoKStats.gg%c frontend initialized`,
+            "font-weight:700;color:#20C878;",
+            "font-weight:400;color:inherit;"
+        );
+
+        Calculator.init();
+
+        DataHealth.run();
+
+        Navigation.init();
+
+        AppUI.init();
+
+        Keyboard.init();
+
+        SearchOutsideClick.init();
+
+        ImageFallbacks.init();
+
+        PageVisibility.init();
+
+        MobileNavigation.init();
+
+        RevealAnimations.init();
+
+        Navigation.loadFromURL();
+
+        this.bindGlobalLanguage();
+
+        this.bindBeforeUnload();
+
+        this.exposeDebugTools();
+    },
+
+
+    bindGlobalLanguage() {
+
+        DOM.queryAll(
+            "[data-language]"
+        ).forEach(select => {
+
+            select.addEventListener(
+                "change",
+                event => {
+
+                    I18N.setLanguage(
+                        event.target.value
+                    );
+                }
+            );
+
+        });
+    },
+
+
+    bindBeforeUnload() {
+
+        window.addEventListener(
+            "beforeunload",
+            () => {
+                Slider.stop();
+            }
+        );
+    },
+
+
+    exposeDebugTools() {
+
+        /*
+         * Small developer helpers.
+         * No production secrets.
+         */
+
+        window.HoKStats = {
+            state: AppState,
+            data: DATA,
+            api: API,
+            calculator: Calculator,
+            navigation: Navigation,
+            search: Search,
+            bookmarks: Bookmarks,
+            toast: Toast,
+            modal: Modal,
+            health: DataHealth
+        };
+    }
+};
+
+
+/* =========================================================
+   36. START APPLICATION
+   ========================================================= */
+
+if (
+    document.readyState === "loading"
+) {
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        () => App.init(),
+        {
+            once: true
+        }
+    );
+
+} else {
+
+    App.init();
+
 }
 
-document.addEventListener("DOMContentLoaded", init);
+
+/* =========================================================
+   END OF HoKStats.gg SCRIPT
+   ========================================================= */
